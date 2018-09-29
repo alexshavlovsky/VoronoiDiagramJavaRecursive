@@ -13,6 +13,13 @@ class Diagram{
     private HashMap<Point2D,Set<Point2D>> points = new HashMap<>();
     private HashMap<Point2D,Set<Point2D>> nodes = new HashMap<>();
 
+    private HashMap<Point2D,Set<Edge>> SiteEdge = new HashMap<>();
+    private HashMap<Point2D,Set<Point2D>> SiteNode = new HashMap<>();
+    private HashMap<Point2D,Set<Point2D>> NodeSite = new HashMap<>(); //3
+    private HashMap<Point2D,Set<Edge>> NodeEdge = new HashMap<>(); //3
+    private HashMap<Edge,Set<Point2D>> EdgeSite = new HashMap<>(); //2
+    private HashMap<Edge,Set<Point2D>> EdgeNode = new HashMap<>(); //0-2
+
     @Override
     public String toString() {
         return "---=== Diagram ===---\n" +
@@ -63,6 +70,8 @@ class Diagram{
 
         Point2D p1 = hull.pivotU.p1;
         Point2D p2 = hull.pivotU.p2;
+        points.get(p1).add(p2);
+        points.get(p2).add(p1);
         double ym = Double.POSITIVE_INFINITY;
         while (true) {
             Point2D[] intersect = getFirstIntersect(p1, p2, ym);
@@ -81,10 +90,12 @@ class Diagram{
 
     void draw(Canvas pap) {
         for (Point2D p : points.keySet()) pap.addPoint(p, Color.RED, 20);
+        int r=10;
         for (Point2D n : nodes.keySet()) {
+            r++;
             pap.addPoint(n, Color.BLUE, 10);
             Point2D[] pts = nodes.get(n).toArray(new Point2D[3]);
-            for (int i = 0; i < 3; i++) pap.addLine(new Line2D(pts[i], pts[(i + 1) % 3]), Color.RED);
+            for (int i = 0; i < 3; i++) pap.addLine(new Line2D(pts[i], pts[(i + 1) % 3]), new Color((64+r % 2 * 64)%192,(64+r%3 * 64)%192,(64+64%5*64)%192));
             for (int i = 0; i < 3; i++) pap.addLine(new Edge(pts[i], pts[(i + 1) % 3]).LineCircleIntersect(n,50), Color.BLUE);
         }
     }
