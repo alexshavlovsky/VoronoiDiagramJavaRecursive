@@ -24,7 +24,7 @@ class ConvexHull {
 
     ConvexHull(List<Point2D> s) {
         halves = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
-        s.sort(Utils::comparePoint);
+        s.sort(Utils::comparePointXY);
         s.forEach(this::putPoint);
     }
 

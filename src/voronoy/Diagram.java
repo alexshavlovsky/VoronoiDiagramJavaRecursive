@@ -4,9 +4,11 @@ import gui.Canvas;
 
 import java.awt.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static geometry.Utils.comparePoint;
+import static geometry.Utils.comparePointXY;
+import static geometry.Utils.comparePointYX;
 import static voronoy.ConvexHull.mergeHulls;
 
 class Diagram {
@@ -61,14 +63,12 @@ class Diagram {
         this(new Point2D(x1, Y_EXPORT - y1), new Point2D(x2, Y_EXPORT - y2));
     }
 
-    private static final double ZERO = 0.00001;
-
-    public Object[] getFirstIntersect(Point2D p1, Point2D p2, double ym) {
+    public Object[] getFirstIntersect(Point2D p1, Point2D p2, Point2D pm) {
         LineCommon ray = new Edge(p1, p2);
         return Stream.of(
                 siteEdge.get(p1).stream().map(e -> new Object[]{ray.getIntersectionPoint(e), p1, e}),
                 siteEdge.get(p2).stream().map(e -> new Object[]{ray.getIntersectionPoint(e), p2, e})
-        ).flatMap(x -> x).filter(p -> ((Point2D) p[0]).y + ZERO < ym).max((a, b) -> comparePoint((Point2D) a[0], (Point2D) b[0])).orElse(null);
+        ).flatMap(x -> x).filter(p -> comparePointYX((Point2D) p[0], pm) < 0).max((a, b) -> comparePointXY((Point2D) a[0], (Point2D) b[0])).orElse(null);
     }
 
     Point2D getOpposite(Edge e, Point2D p) {
@@ -89,14 +89,14 @@ class Diagram {
         d.siteEdge.putAll(d2.siteEdge);
         Point2D p1 = h.pivot[0].p1;
         Point2D p2 = h.pivot[0].p2;
-        double ym = Double.POSITIVE_INFINITY;
+        Point2D pm = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         while (true) {
-            Object[] intersect = d.getFirstIntersect(p1, p2, ym);
+            Object[] intersect = d.getFirstIntersect(p1, p2, pm);
             if (intersect == null) break;
             nodes.add(intersect);
             if (intersect[1] == p1) p1 = d1.getOpposite((Edge) intersect[2], p1);
             if (intersect[1] == p2) p2 = d2.getOpposite((Edge) intersect[2], p2);
-            ym = ((Point2D) intersect[0]).y;
+            pm = (Point2D) intersect[0];
         }
         return d;
     }
@@ -112,12 +112,12 @@ class Diagram {
         for (Map.Entry<Point2D, Set<Edge>> point2DSetEntry : siteEdge.entrySet()) {
             pap.addPoint(point2DSetEntry.getKey(), Color.RED, 16);
             for (Edge edge : point2DSetEntry.getValue())
-                pap.addLine(edge.LineCircleIntersect(edge.midPoint, 1000), Color.BLUE);
+                pap.addLine(edge.getRays(1000), Color.BLUE);
         }
     }
 
     String exportSites() {
-        return null;//points.keySet().stream().map(p->(int)p.x+","+(Y_EXPORT-(int)p.y)).collect(Collectors.joining(",","{\"sites\":[","],\"queries\":[]}"));
+        return siteEdge.keySet().stream().map(p->(int)p.x+","+(Y_EXPORT-(int)p.y)).collect(Collectors.joining(",","{\"sites\":[","],\"queries\":[]}"));
     }
 
 }
