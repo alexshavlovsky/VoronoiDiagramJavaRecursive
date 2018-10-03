@@ -6,6 +6,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static geometry.Utils.comparePoint;
 import static voronoy.ConvexHull.mergeHulls;
 
 class Diagram {
@@ -60,31 +61,6 @@ class Diagram {
         this(new Point2D(x1, Y_EXPORT - y1), new Point2D(x2, Y_EXPORT - y2));
     }
 
-    public void consolidate(Diagram d2) {
-        //ConvexHulhull.consolidate(d2.hull);
-/*        points.putAll(d2.points);
-        nodes.putAll(d2.nodes);
-
-        Point2D p1 = hull.pivotU.p1;
-        Point2D p2 = hull.pivotU.p2;
-        points.get(p1).add(p2);
-        points.get(p2).add(p1);
-        double ym = Double.POSITIVE_INFINITY;
-        while (true) {
-            Point2D[] intersect = getFirstIntersect(p1, p2, ym);
-            if (intersect == null) break;
-            nodes.put(intersect[0], new HashSet<>(Arrays.asList(p1, p2, intersect[1])));
-            Point2D[] pts = {p1, p2, intersect[1]};
-            for (int i = 0; i < 3; i++) {
-                points.get(pts[i]).add(pts[(i + 1) % 3]);
-                points.get(pts[i]).add(pts[(i + 2) % 3]);
-            }
-            if (p1 == intersect[2]) p1 = intersect[1];
-            if (p2 == intersect[2]) p2 = intersect[1];
-            ym = intersect[0].y;
-        }*/
-    }
-
     private static final double ZERO = 0.00001;
 
     public Object[] getFirstIntersect(Point2D p1, Point2D p2, double ym) {
@@ -92,7 +68,7 @@ class Diagram {
         return Stream.of(
                 siteEdge.get(p1).stream().map(e -> new Object[]{ray.getIntersectionPoint(e), p1, e}),
                 siteEdge.get(p2).stream().map(e -> new Object[]{ray.getIntersectionPoint(e), p2, e})
-        ).flatMap(x -> x).filter(p -> ((Point2D) p[0]).y + ZERO < ym).max((a, b) -> (int) (((Point2D) a[0]).y - ((Point2D) b[0]).y)).orElse(null);
+        ).flatMap(x -> x).filter(p -> ((Point2D) p[0]).y + ZERO < ym).max((a, b) -> comparePoint((Point2D) a[0], (Point2D) b[0])).orElse(null);
     }
 
     Point2D getOpposite(Edge e, Point2D p) {

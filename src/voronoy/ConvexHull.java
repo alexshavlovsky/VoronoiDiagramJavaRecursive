@@ -1,8 +1,14 @@
 package voronoy;
 
+import geometry.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static geometry.Utils.*;
 
 class ConvexHull {
     ArrayList<Point2D>[] halves;
@@ -18,20 +24,18 @@ class ConvexHull {
 
     ConvexHull(List<Point2D> s) {
         halves = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
-        //s.sort((p1, p2) -> p1.x != p2.x ? Double.compare(p1.x, p2.x) : Double.compare(p1.y, p2.y));
-        for (Point2D p : s) for (int i = 0; i < 2; i++) putPointHalf(p, null, i);
+        s.sort(Utils::comparePoint);
+        s.forEach(this::putPoint);
     }
 
     ConvexHull(ConvexHull ch) {
         halves = new ArrayList[]{new ArrayList<>(ch.halves[0]), new ArrayList<>(ch.halves[1])};
     }
 
-/*    ConvexHull(List<Point2D> s, int i1, int i2) {
-        u = new ArrayList<>();
-        d = new ArrayList<>();
+    ConvexHull(List<Point2D> s, int i1, int i2) {
+        halves = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
         IntStream.range(i1, i2).mapToObj(s::get).forEach(this::putPoint);
-    }*/
-
+    }
 
     static ConvexHull mergeHulls(ConvexHull ch1, ConvexHull ch2) {
         ConvexHull ch = new ConvexHull(ch1);
@@ -44,12 +48,8 @@ class ConvexHull {
         return ch;
     }
 
-    static private double getArea(Point2D p1, Point2D p2, Point2D p3) {
-        return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
-    }
-
-    static boolean cmpArea(double d, int half) {
-        return half == 0 ? d >= 0 : d <= 0;
+    private static boolean cmpArea(double d, int half) {
+        return half == 0 ? cmpGE(d, 0) : cmpLE(d, 0);
     }
 
     private void putPointHalf(Point2D p, int[] m, int i) {
@@ -59,12 +59,19 @@ class ConvexHull {
         halves[i].add(p);
     }
 
-  /*  List<Point2D> asList() {
+    private void putPoint(Point2D p) {
+        for (int i = 0; i < 2; i++) putPointHalf(p, null, i);
+    }
+
+    List<Point2D> asList() {
         List<Point2D> r = new ArrayList<>();
-        u.stream().limit(u.size() - 1).forEach(r::add);
-        int s = d.size();
-        IntStream.range(1, s).map(i -> s - i).mapToObj(d::get).forEach(r::add);
+        int s0 = halves[0].size();
+        int s1 = halves[1].size();
+        Stream.of(
+                halves[0].stream().limit(s0 - 1),
+                IntStream.range(1, s1).map(i -> s1 - i).mapToObj(halves[1]::get)
+        ).flatMap(p -> p).forEach(r::add);
         return r;
-    }*/
+    }
 
 }
