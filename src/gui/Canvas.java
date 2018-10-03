@@ -1,7 +1,7 @@
 package gui;
 
-import voronoy.Line2D;
-import voronoy.Point2D;
+import geometry.Line2D;
+import geometry.Point2D;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,5 +1,8 @@
 package voronoy;
 
+import geometry.Line2D;
+import geometry.LineCommon;
+import geometry.Point2D;
 import gui.Canvas;
 
 import java.awt.*;
@@ -7,6 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static geometry.Utils.LinesIntersect;
 import static geometry.Utils.comparePointXY;
 import static geometry.Utils.comparePointYX;
 import static voronoy.ConvexHull.mergeHulls;
@@ -66,8 +70,8 @@ class Diagram {
     public Object[] getFirstIntersect(Point2D p1, Point2D p2, Point2D pm) {
         LineCommon ray = new Edge(p1, p2);
         return Stream.of(
-                siteEdge.get(p1).stream().map(e -> new Object[]{ray.getIntersectionPoint(e), p1, e}),
-                siteEdge.get(p2).stream().map(e -> new Object[]{ray.getIntersectionPoint(e), p2, e})
+                siteEdge.get(p1).stream().map(e -> new Object[]{LinesIntersect(ray, e), p1, e}),
+                siteEdge.get(p2).stream().map(e -> new Object[]{LinesIntersect(ray, e), p2, e})
         ).flatMap(x -> x).filter(p -> comparePointYX((Point2D) p[0], pm) < 0).max((a, b) -> comparePointXY((Point2D) a[0], (Point2D) b[0])).orElse(null);
     }
 
@@ -112,12 +116,12 @@ class Diagram {
         for (Map.Entry<Point2D, Set<Edge>> point2DSetEntry : siteEdge.entrySet()) {
             pap.addPoint(point2DSetEntry.getKey(), Color.RED, 16);
             for (Edge edge : point2DSetEntry.getValue())
-                pap.addLine(edge.getRays(1000), Color.BLUE);
+                pap.addLine(edge.toLine2D(1000), Color.BLUE);
         }
     }
 
     String exportSites() {
-        return siteEdge.keySet().stream().map(p->(int)p.x+","+(Y_EXPORT-(int)p.y)).collect(Collectors.joining(",","{\"sites\":[","],\"queries\":[]}"));
+        return siteEdge.keySet().stream().map(p -> (int) p.x + "," + (Y_EXPORT - (int) p.y)).collect(Collectors.joining(",", "{\"sites\":[", "],\"queries\":[]}"));
     }
 
 }

@@ -1,5 +1,7 @@
 package voronoy;
 
+import geometry.Line2D;
+import geometry.Point2D;
 import geometry.Utils;
 
 import java.util.ArrayList;

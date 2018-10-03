@@ -1,14 +1,14 @@
 package geometry;
 
-import voronoy.Line2D;
-import voronoy.LineCommon;
-import voronoy.Point2D;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+    private Utils() {
+        throw new AssertionError();
+    }
 
     private static final double EPS = 10e-9;
 
@@ -92,6 +92,25 @@ public class Utils {
         return new Line2D(
                 new Point2D(x0 - line.B * m, y0 + line.A * m),
                 new Point2D(x0 + line.B * m, y0 - line.A * m));
+    }
+
+    public static LineCommon getLineCommonByPoints(Point2D p1, Point2D p2) {
+        double dx = p2.x - p1.x;
+        double dy = p1.y - p2.y;
+        double n = Math.sqrt(dx * dx + dy * dy);
+        return new LineCommon(dy / n, dx / n, (p1.x * p2.y - p2.x * p1.y) / n);
+    }
+
+    public static LineCommon translateLineCommon(LineCommon lineCommon, double dx, double dy) {
+        return new LineCommon(lineCommon.A, lineCommon.B, lineCommon.C - dx * lineCommon.A - dy * lineCommon.B);
+    }
+
+    public static LineCommon getOrthogonalToLineCommonFromPoint(LineCommon lineCommon, Point2D p0) {
+        return new LineCommon(-lineCommon.B, lineCommon.A, p0.x * lineCommon.B - p0.y * lineCommon.A);
+    }
+
+    public static LineCommon getParallelLineCommonFromPoint(LineCommon lineCommon, Point2D p0) {
+        return new LineCommon(lineCommon.A, lineCommon.B, -p0.x * lineCommon.A - p0.y * lineCommon.B);
     }
 
 }
