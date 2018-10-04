@@ -26,18 +26,15 @@ public class Canvas extends JComponent {
     public void addLine(Line2D l, Color c) {
         if (l == null) return;
         figures.add(new DrawableLine(l.p1, l.p2, c));
-        repaint();
     }
 
     public void addPoint(Point2D p, Color c, int s) {
         if (p == null) return;
         figures.add(new DrawablePoint(p, c, s));
-        repaint();
     }
 
     public void clear() {
         figures.clear();
-        repaint();
     }
 
     @Override

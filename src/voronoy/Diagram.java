@@ -94,11 +94,12 @@ class Diagram {
         while (true) {
             EdgesIntersection intersect = d.getFirstIntersect(p1, p2, pm);
             if (intersect == null) break;
-            nodes.add(intersect);
+            Point2D p3 = (intersect.site == p1) ? d1.getOpposite(intersect.e, intersect.site) : d2.getOpposite(intersect.e, intersect.site);
+//            nodes.add(intersect);
+            
             d.siteEdge.get(p1).add(intersect.ray);
             d.siteEdge.get(p2).add(intersect.ray);
-            if (intersect.site == p1) p1 = d1.getOpposite(intersect.e, p1);
-            if (intersect.site == p2) p2 = d2.getOpposite(intersect.e, p2);
+            if (intersect.site == p1) p1 = p3; else p2 = p3;
             pm = intersect.node;
         }
         return d;

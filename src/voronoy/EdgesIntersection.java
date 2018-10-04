@@ -15,4 +15,11 @@ class EdgesIntersection {
         this.node = LinesIntersect(ray, e);
     }
 
+    public EdgesIntersection(Edge ray){
+        this.ray = ray;
+        this.e = null;
+        this.site = null;
+        this.node = null;
+    }
+
 }
