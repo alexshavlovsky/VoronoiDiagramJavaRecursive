@@ -1,7 +1,5 @@
 package voronoy;
 
-import geometry.Line2D;
-import geometry.LineCommon;
 import geometry.Point2D;
 import gui.Canvas;
 
@@ -10,7 +8,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static geometry.Utils.LinesIntersect;
 import static geometry.Utils.comparePointXY;
 import static geometry.Utils.comparePointYX;
 import static voronoy.ConvexHull.mergeHulls;
@@ -67,12 +64,12 @@ class Diagram {
         this(new Point2D(x1, Y_EXPORT - y1), new Point2D(x2, Y_EXPORT - y2));
     }
 
-    public Object[] getFirstIntersect(Point2D p1, Point2D p2, Point2D pm) {
-        LineCommon ray = new Edge(p1, p2);
+    public EdgesIntersection getFirstIntersect(Point2D p1, Point2D p2, Point2D pm) {
+        Edge ray = new Edge(p1, p2);
         return Stream.of(
-                siteEdge.get(p1).stream().map(e -> new Object[]{LinesIntersect(ray, e), p1, e}),
-                siteEdge.get(p2).stream().map(e -> new Object[]{LinesIntersect(ray, e), p2, e})
-        ).flatMap(x -> x).filter(p -> comparePointYX((Point2D) p[0], pm) < 0).max((a, b) -> comparePointXY((Point2D) a[0], (Point2D) b[0])).orElse(null);
+                siteEdge.get(p1).stream().map(e -> new EdgesIntersection(p1, ray, e)),
+                siteEdge.get(p2).stream().map(e -> new EdgesIntersection(p2, ray, e))
+        ).flatMap(x -> x).filter(i -> comparePointYX(i.node, pm) < 0).max((a, b) -> comparePointXY(a.node, b.node)).orElse(null);
     }
 
     Point2D getOpposite(Edge e, Point2D p) {
@@ -80,7 +77,7 @@ class Diagram {
         return pair[0] == p ? pair[1] : pair[0];
     }
 
-    static ArrayList<Object[]> nodes = new ArrayList<>();
+    static ArrayList<EdgesIntersection> nodes = new ArrayList<>();
 
     static Color getColorFromInt(int i) {
         return Color.getHSBColor((i % 12) / 12.0f, 0.8f, 0.8f);
@@ -95,24 +92,25 @@ class Diagram {
         Point2D p2 = h.pivot[0].p2;
         Point2D pm = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         while (true) {
-            Object[] intersect = d.getFirstIntersect(p1, p2, pm);
+            EdgesIntersection intersect = d.getFirstIntersect(p1, p2, pm);
             if (intersect == null) break;
             nodes.add(intersect);
-            if (intersect[1] == p1) p1 = d1.getOpposite((Edge) intersect[2], p1);
-            if (intersect[1] == p2) p2 = d2.getOpposite((Edge) intersect[2], p2);
-            pm = (Point2D) intersect[0];
+            d.siteEdge.get(p1).add(intersect.ray);
+            d.siteEdge.get(p2).add(intersect.ray);
+            if (intersect.site == p1) p1 = d1.getOpposite(intersect.e, p1);
+            if (intersect.site == p2) p2 = d2.getOpposite(intersect.e, p2);
+            pm = intersect.node;
         }
         return d;
     }
 
     void draw(Canvas pap) {
-        for (int i = 0; i < nodes.size(); i++) {
-            pap.addPoint((Point2D) nodes.get(i)[0], getColorFromInt(i), 8);
-            pap.addPoint((Point2D) nodes.get(i)[1], getColorFromInt(i), 32);
+/*        for (int i = 0; i < nodes.size(); i++) {
+            pap.addPoint(nodes.get(i).node, getColorFromInt(i), 8);
+            pap.addPoint(nodes.get(i).site, getColorFromInt(i), 32);
         }
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            pap.addLine(new Line2D((Point2D) nodes.get(i)[0], (Point2D) nodes.get(i + 1)[0]), getColorFromInt(i));
-        }
+        for (int i = 0; i < nodes.size() - 1; i++)
+            pap.addLine(new Line2D(nodes.get(i).node, nodes.get(i + 1).node), getColorFromInt(i));*/
         for (Map.Entry<Point2D, Set<Edge>> point2DSetEntry : siteEdge.entrySet()) {
             pap.addPoint(point2DSetEntry.getKey(), Color.RED, 16);
             for (Edge edge : point2DSetEntry.getValue())

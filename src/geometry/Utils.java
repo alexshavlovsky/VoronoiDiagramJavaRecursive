@@ -59,12 +59,6 @@ public class Utils {
                 (xm - x12 * p3.y * p3.y - x31 * p2.y * p2.y - x23 * p1.y * p1.y) / d);
     }
 
-    public static double getPolarSqr(Point2D p0, Point2D p) {
-        double dx = p.x - p0.x;
-        double dy = p.y - p0.y;
-        return dx / Math.sqrt(dx * dx + dy * dy);
-    }
-
     public static List<Point2D> getSortedListFrom2DArray(double[][] a) {
         return Arrays.stream(a).map(e -> new Point2D(e[0], e[1])).sorted(Utils::comparePointXY).collect(Collectors.toList());
     }
@@ -76,10 +70,6 @@ public class Utils {
     public static Point2D LinesIntersect(LineCommon l1, LineCommon l2) {
         double den = l1.A * l2.B - l1.B * l2.A;
         return new Point2D((-l2.B * l1.C + l1.B * l2.C) / den, (l2.A * l1.C - l1.A * l2.C) / den);
-    }
-
-    public static double getDistToPoint(LineCommon l1, Point2D p) {
-        return l1.A * p.x + l1.B * p.y + l1.C / Math.sqrt(l1.A * l1.A + l1.B * l1.B);
     }
 
     public static Line2D LineCircleIntersect(LineCommon line, Point2D c0, double r0) {
@@ -111,6 +101,10 @@ public class Utils {
 
     public static LineCommon getParallelLineCommonFromPoint(LineCommon lineCommon, Point2D p0) {
         return new LineCommon(lineCommon.A, lineCommon.B, -p0.x * lineCommon.A - p0.y * lineCommon.B);
+    }
+
+    public static double getDistToPoint(LineCommon l1, Point2D p) {
+        return l1.A * p.x + l1.B * p.y + l1.C / Math.sqrt(l1.A * l1.A + l1.B * l1.B);
     }
 
 }
