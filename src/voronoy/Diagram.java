@@ -5,6 +5,7 @@ import gui.Canvas;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,9 +16,8 @@ import static voronoy.ConvexHull.mergeHulls;
 class Diagram {
     final static private int Y_EXPORT = 675;
     private ConvexHull hull;
-    private HashMap<Point2D, Set<Edge>> siteEdge = new HashMap<>();      //0-...
-    private HashMap<Point2D, Set<Node>> siteNode = new HashMap<>();      //0-...
-    private HashMap<Edge, Set<Point2D>> edgeNode = new HashMap<>();      //0-2
+    private HashMap<Point2D, List<Edge>> siteEdge = new HashMap<>();      //0-...
+    private HashMap<Point2D, List<Node>> siteNode = new HashMap<>();      //0-...
 
     @Override
     public String toString() {
@@ -25,7 +25,6 @@ class Diagram {
                 "\n" + hull +
                 "\nSite-Edge=" + siteEdge +
                 "\nSite-Node=" + siteNode +
-                "\nEdge-Node=" + edgeNode +
                 '}';
     }
 
@@ -36,8 +35,8 @@ class Diagram {
     public Diagram(Point2D p1) {
         hull = new ConvexHull(Arrays.asList(p1));
 
-        siteEdge.put(p1, new HashSet<>());
-        siteNode.put(p1, new HashSet<>());
+        siteEdge.put(p1, new ArrayList<>());
+        siteNode.put(p1, new ArrayList<>());
     }
 
 /*    public Diagram(Point2D p1, Point2D p2) {
@@ -74,7 +73,7 @@ class Diagram {
         return Color.getHSBColor((i % 12) / 12.0f, 0.8f, 0.8f);
     }
 
-    void putEdge(Edge edge){
+    void putEdge(Edge edge) {
         siteEdge.get(edge.p1).add(edge);
         siteEdge.get(edge.p2).add(edge);
     }
@@ -93,15 +92,16 @@ class Diagram {
         d.siteNode.putAll(d1.siteNode);
         d.siteNode.putAll(d2.siteNode);
         Point2D pm = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-        Edge inRay = new Edge(h.pivot[0].p1,h.pivot[0].p2);
+        Edge inRay = new Edge(h.pivot[0].p1, h.pivot[0].p2);
         while (true) {
             d.putEdge(inRay);
             EdgesIntersection intersect = d.getFirstIntersect(inRay, pm);
 //            chain.add(intersect);
             if (intersect == null) break;
             Point2D p3 = intersect.edge.getOpposite(intersect.site);
-            Edge outRay = (intersect.site == inRay.p1) ? new Edge(p3, inRay.p2) : new Edge(inRay.p1, p3);
-            d.putNode(new Node(inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay));
+            boolean isLeft = intersect.site == inRay.p1;
+            Edge outRay = (isLeft) ? new Edge(p3, inRay.p2) : new Edge(inRay.p1, p3);
+            d.putNode(new Node(intersect.node, inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay, isLeft));
             pm = intersect.node;
             inRay = outRay;
         }
@@ -115,11 +115,15 @@ class Diagram {
         }
         for (int i = 0; i < chain.size() - 1; i++)
             pap.addLine(new Line2D(chain.get(i).node, chain.get(i + 1).node), getColorFromInt(i));*/
-        for (Map.Entry<Point2D, Set<Edge>> point2DSetEntry : siteEdge.entrySet()) {
+        for (Map.Entry<Point2D, List<Edge>> point2DSetEntry : siteEdge.entrySet()) {
             pap.addPoint(point2DSetEntry.getKey(), Color.RED, 16);
-            for (Edge edge : point2DSetEntry.getValue())
-                pap.addLine(edge.toLine2D(1000), Color.BLUE);
+/*            for (Edge edge : point2DSetEntry.getValue())
+                pap.addLine(edge.toLine2D(1000), Color.BLUE);*/
         }
+        Point2D origin = hull.halves[0].get(0);
+        if (siteNode.get(origin).size() == 0 && siteNode.get(origin).size() > 0)
+            pap.addLine(siteEdge.get(origin).get(0).toLine2D(1000), Color.BLUE);
+
         pap.repaint();
     }
 

@@ -10,6 +10,7 @@ import static geometry.Utils.getMidPoint;
 class Edge extends LineCommon {
 
     Point2D p1, p2;
+    Node n1, n2;
 
     Edge(Point2D p1, Point2D p2) {
         super(p1.x - p2.x, p1.y - p2.y);
@@ -30,4 +31,13 @@ class Edge extends LineCommon {
         return LineCircleIntersect(this, getMidPoint(p1, p2), r0);
     }
 
+    @Override
+    public String toString() {
+        return "Edge{" +
+                "p1=" + p1 +
+                ", p2=" + p2 +
+                ", n1=" + n1 +
+                ", n2=" + n2 +
+                '}';
+    }
 }
