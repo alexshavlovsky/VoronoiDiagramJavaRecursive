@@ -28,8 +28,13 @@ class Edge extends LineCommon {
     }
 
     Line2D toLine2D(double r0) {
-        return LineCircleIntersect(this, getMidPoint(p1, p2), r0);
+        return toLine2D(getMidPoint(p1, p2), r0);
     }
+
+    Line2D toLine2D(Point2D p0, double r0) {
+        return LineCircleIntersect(this, p0, r0);
+    }
+
 
     @Override
     public String toString() {

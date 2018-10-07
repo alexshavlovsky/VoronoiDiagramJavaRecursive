@@ -1,5 +1,6 @@
 package voronoy;
 
+import geometry.Line2D;
 import geometry.Point2D;
 import gui.Canvas;
 
@@ -9,15 +10,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static geometry.Utils.comparePointXY;
 import static geometry.Utils.comparePointYX;
 import static voronoy.ConvexHull.mergeHulls;
 
 class Diagram {
     final static private int Y_EXPORT = 675;
     private ConvexHull hull;
-    private HashMap<Point2D, List<Edge>> siteEdge = new HashMap<>();      //0-...
-    private HashMap<Point2D, List<Node>> siteNode = new HashMap<>();      //0-...
+    private HashMap<Point2D, List<Edge>> siteEdge = new HashMap<>();
+    private HashMap<Point2D, List<Node>> siteNode = new HashMap<>();
 
     @Override
     public String toString() {
@@ -63,11 +63,9 @@ class Diagram {
                 siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e))
         ).flatMap(x -> x).
                 filter(i -> comparePointYX(i.node, pm) < 0).
-                max((a, b) -> comparePointXY(a.node, b.node)).
+                max((a, b) -> comparePointYX(a.node, b.node)).
                 orElse(null);
     }
-
-    static ArrayList<EdgesIntersection> chain = new ArrayList<>();
 
     static Color getColorFromInt(int i) {
         return Color.getHSBColor((i % 12) / 12.0f, 0.8f, 0.8f);
@@ -84,7 +82,7 @@ class Diagram {
         siteNode.get(node.p3).add(node);
     }
 
-    static Diagram mergeDiagrams(Diagram d1, Diagram d2) {
+    static Diagram mergeDiagrams(Diagram d1, Diagram d2, Canvas pap) {
         ConvexHull h = mergeHulls(d1.hull, d2.hull);
         Diagram d = new Diagram(h);
         d.siteEdge.putAll(d1.siteEdge);
@@ -96,11 +94,15 @@ class Diagram {
         while (true) {
             d.putEdge(inRay);
             EdgesIntersection intersect = d.getFirstIntersect(inRay, pm);
-//            chain.add(intersect);
             if (intersect == null) break;
             Point2D p3 = intersect.edge.getOpposite(intersect.site);
             boolean isLeft = intersect.site == inRay.p1;
             Edge outRay = (isLeft) ? new Edge(p3, inRay.p2) : new Edge(inRay.p1, p3);
+            if (pap!=null) {
+                System.out.println(isLeft);
+                pap.addLine(inRay.toLine2D(1000), Color.BLACK);
+                pap.addPoint(intersect.node, Color.BLACK, 16);
+            }
             d.putNode(new Node(intersect.node, inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay, isLeft));
             pm = intersect.node;
             inRay = outRay;
@@ -108,23 +110,50 @@ class Diagram {
         return d;
     }
 
+
     void draw(Canvas pap) {
-/*        for (int i = 0; i < chain.size(); i++) {
-            pap.addPoint(chain.get(i).node, getColorFromInt(i), 8);
-            pap.addPoint(chain.get(i).site, getColorFromInt(i), 32);
-        }
-        for (int i = 0; i < chain.size() - 1; i++)
-            pap.addLine(new Line2D(chain.get(i).node, chain.get(i + 1).node), getColorFromInt(i));*/
         for (Map.Entry<Point2D, List<Edge>> point2DSetEntry : siteEdge.entrySet()) {
             pap.addPoint(point2DSetEntry.getKey(), Color.RED, 16);
-/*            for (Edge edge : point2DSetEntry.getValue())
-                pap.addLine(edge.toLine2D(1000), Color.BLUE);*/
         }
         Point2D origin = hull.halves[0].get(0);
-        if (siteNode.get(origin).size() == 0 && siteNode.get(origin).size() > 0)
-            pap.addLine(siteEdge.get(origin).get(0).toLine2D(1000), Color.BLUE);
+        if (siteNode.get(origin).size() == 0) {
+            if (siteEdge.get(origin).size() > 0) pap.addLine(siteEdge.get(origin).get(0).toLine2D(1000), Color.BLUE);
+        } else {
+            parse(siteNode.get(origin).get(0), pap);
+            Node.parsed();
+        }
 
         pap.repaint();
+    }
+
+    Node drawEdge(Edge e, Point2D p, Canvas pap, Color c, boolean inEdge) {
+        Line2D l = e.toLine2D(p, 100);
+        Node res = null;
+        if (e.n1 != null && e.n2 != null) {
+            l = new Line2D(e.n1.p, e.n2.p);
+            if (!e.n1.visited()) res = e.n1;
+            if (!e.n2.visited()) res = e.n2;
+        } else if (inEdge) {
+            l.p1 = p;
+            if (e.n1 != null) l.p2 = e.n1.p;
+            res = e.n1;
+        } else {
+            l.p2 = p;
+            if (e.n2 != null) l.p1 = e.n2.p;
+            res = e.n2;
+        }
+        pap.addLine(l, c);
+        return res;
+    }
+
+    void parse(Node node, Canvas pap) {
+        if (node == null || node.visited()) return;
+        else node.markVisited();
+        pap.addPoint(node.p, Color.blue, 8);
+
+        parse(drawEdge(node.in, node.p, pap, Color.ORANGE, true),pap);
+        parse(drawEdge(node.out, node.p, pap, Color.GREEN, false),pap);
+        parse(drawEdge(node.edge, node.p, pap, Color.CYAN, !node.isLeft),pap);
     }
 
     String exportSites() {
