@@ -2,6 +2,8 @@ package voronoy;
 
 import geometry.Point2D;
 
+import static geometry.Utils.comparePointXY;
+
 public class Node {
     private static boolean visitedFlag = true;
     private boolean isVisited;
@@ -18,12 +20,14 @@ public class Node {
         this.in = in;
         this.edge = edge;
         this.out = out;
-        in.n2 = this;
-        if (edge.n2 == null) edge.n2 = this;
-        else if (edge.n1 == null) edge.n1 = this;
-        else {
-            System.out.println("dado");
+        if (edge.n1==null && edge.n2==null) edge.n2 = this; else {
+            int n1 = 0, n2=0;
+            if (edge.n1 != null) n1 = comparePointXY(edge.n1.p, p);
+            if (edge.n2 != null) n2 = comparePointXY(edge.n2.p, p);
+            System.out.println(n1+"//"+n2);
+            if (n1==-1 || n2 ==1) edge.n2 = this; else edge.n1 = this;
         }
+        in.n2 = this;
         out.n1 = this;
     }
 
