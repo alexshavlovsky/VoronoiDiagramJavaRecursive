@@ -21,18 +21,19 @@ public class Voron {
         Diagram d8 = new Diagram(585,189);
         Diagram d9 = new Diagram(636,395);
 
-        /*d = mergeDiagrams(d, d2, null);
-        d = mergeDiagrams(d, d3, null);*/
+        d = mergeDiagrams(d, d2, null);
+        d = mergeDiagrams(d, d3, null);
 
-    //   d4 = mergeDiagrams(d4, d5, null);
-   //     d4 = mergeDiagrams(d4, d6, null);
+       d4 = mergeDiagrams(d4, d5, null);
+        d4 = mergeDiagrams(d4, d6, null);
         d4 = mergeDiagrams(d4, d7, null);
         d4 = mergeDiagrams(d4, d8, null);
-        d4 = mergeDiagrams(d4, d9, paper);
+        d4 = mergeDiagrams(d4, d9, null);
 
-        System.out.println(d4);
-        d4.draw(paper);
-        System.out.println(d4.exportSites());
+        d=mergeDiagrams(d,d4,null);
+        System.out.println(d);
+        d.draw(paper);
+        System.out.println(d.exportSites());
     }
 
 }

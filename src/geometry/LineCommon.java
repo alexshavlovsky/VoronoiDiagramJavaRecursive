@@ -2,7 +2,7 @@ package geometry;
 
 public class LineCommon {
 
-    protected double A, B, C;
+    public double A, B, C;
 
     public LineCommon(double a, double b, double c) {
         this(a, b);

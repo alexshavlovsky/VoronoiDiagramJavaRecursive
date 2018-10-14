@@ -17,7 +17,7 @@ class Diagram {
     final static private int Y_EXPORT = 675;
     private ConvexHull hull;
     private HashMap<Point2D, List<Edge>> siteEdge = new HashMap<>();
-    private HashMap<Point2D, List<Node>> siteNode = new HashMap<>();
+    HashMap<Point2D, List<Node>> siteNode = new HashMap<>();
 
     @Override
     public String toString() {
@@ -76,11 +76,11 @@ class Diagram {
         siteEdge.get(edge.p2).add(edge);
     }
 
-    void putNode(Node node) {
+/*    void putNode(Node node) {
         siteNode.get(node.p1).add(node);
         siteNode.get(node.p2).add(node);
         siteNode.get(node.p3).add(node);
-    }
+    }*/
 
     static Diagram mergeDiagrams(Diagram d1, Diagram d2, Canvas pap) {
         ConvexHull h = mergeHulls(d1.hull, d2.hull);
@@ -103,7 +103,7 @@ class Diagram {
                 pap.addLine(inRay.toLine2D(1000), Color.BLACK);
                 pap.addPoint(intersect.node, Color.BLACK, 16);
             }
-            d.putNode(new Node(intersect.node, inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay, isLeft));
+            new Node(intersect.node, inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay, isLeft,d);
             pm = intersect.node;
             inRay = outRay;
         }
@@ -127,7 +127,7 @@ class Diagram {
     }
 
     Node drawEdge(Edge e, Point2D p, Canvas pap, Color c, boolean inEdge) {
-        Line2D l = e.toLine2D(p, 100);
+        Line2D l = e.toLine2D(p, 1000);
         Node res = null;
         if (e.n1 != null && e.n2 != null) {
             l = new Line2D(e.n1.p, e.n2.p);
