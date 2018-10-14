@@ -1,10 +1,10 @@
 package geometry;
 
-public class Point2D {
+public class Point {
 
     public double x, y;
 
-    public Point2D(double x0, double y0) {
+    public Point(double x0, double y0) {
         x = x0;
         y = y0;
     }

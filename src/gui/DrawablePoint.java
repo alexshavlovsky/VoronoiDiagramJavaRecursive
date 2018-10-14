@@ -1,14 +1,14 @@
 package gui;
 
-import geometry.Point2D;
+import geometry.Point;
 
 import java.awt.*;
 
-class DrawablePoint extends Point2D implements Drawable {
+class DrawablePoint extends Point implements Drawable {
     Color color;
     int size;
 
-    DrawablePoint(Point2D p, Color color, int size) {
+    DrawablePoint(Point p, Color color, int size) {
         super(p.x, p.y);
         this.color = color;
         this.size = size;
@@ -17,6 +17,6 @@ class DrawablePoint extends Point2D implements Drawable {
     @Override
     public void Draw(Graphics g, Canvas c) {
         g.setColor(color);
-        g.drawOval((int) (x * c.scale) - size / 2, c.yMax - (int) (y * c.scale) - size / 2, size, size);
+        g.drawOval(c.transformX(x) - size / 2, c.transformY(y) - size / 2, size, size);
     }
 }

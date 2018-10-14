@@ -1,17 +1,25 @@
 package voronoy;
 
-import geometry.Point2D;
+import geometry.Point;
 
 import static geometry.Utils.LinesIntersect;
 
 class EdgesIntersection {
     Edge edge;
-    Point2D site, node;
+    Point site, node;
 
-    public EdgesIntersection(Point2D site, Edge inRay, Edge edge) {
+    public EdgesIntersection(Point site, Edge inRay, Edge edge) {
         this.edge = edge;
         this.site = site;
         this.node = LinesIntersect(inRay, edge);
     }
 
+    @Override
+    public String toString() {
+        return "EdgesIntersection{" +
+                "edge=" + edge +
+                ", site=" + site +
+                ", node=" + node +
+                '}';
+    }
 }

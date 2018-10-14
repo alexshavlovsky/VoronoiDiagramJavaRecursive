@@ -1,7 +1,7 @@
 package gui;
 
-import geometry.Line2D;
-import geometry.Point2D;
+import geometry.*;
+import geometry.Point;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,14 +12,13 @@ import java.util.stream.IntStream;
 public class Canvas extends JComponent {
 
     private final ArrayList<Drawable> figures = new ArrayList<>();
-    double scale;
-    int yMax;
+    double x0,y0,z;
 
-    public void addListNotClosed(java.util.List<Point2D> l, Color color) {
+    public void addListNotClosed(java.util.List<geometry.Point> l, Color color) {
         IntStream.range(0, l.size() - 1).forEach(i -> addLine(new Line2D(l.get(i), l.get(i + 1)), color));
     }
 
-    public void addListClosed(java.util.List<Point2D> l, Color color) {
+    public void addListClosed(java.util.List<Point> l, Color color) {
         IntStream.range(0, l.size()).forEach(i -> addLine(new Line2D(l.get(i), l.get((i + 1) % l.size())), color));
     }
 
@@ -28,7 +27,7 @@ public class Canvas extends JComponent {
         figures.add(new DrawableLine(l.p1, l.p2, c));
     }
 
-    public void addPoint(Point2D p, Color c, int s) {
+    public void addPoint(Point p, Color c, int s) {
         if (p == null) return;
         figures.add(new DrawablePoint(p, c, s));
     }
@@ -43,15 +42,24 @@ public class Canvas extends JComponent {
         for (Drawable f : figures) f.Draw(g, this);
     }
 
-    public Canvas(int x, int y, double scale) {
-        this.scale = scale;
-        this.yMax = y - 1;
+    public Canvas(int x, int y, double z) {
+        this.x0 = x / 2;
+        this.y0 = y / 2;
+        this.z = z;
         JFrame testFrame = new JFrame();
         testFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setPreferredSize(new Dimension(x, y));
         testFrame.getContentPane().add(this, BorderLayout.CENTER);
         testFrame.pack();
         testFrame.setVisible(true);
+    }
+
+    public int transformX(double x){
+        return (int)(x0+x*z);
+    }
+
+    public int transformY(double y){
+        return (int)(y0-y*z);
     }
 
     /*public static void main(String[] args) {
