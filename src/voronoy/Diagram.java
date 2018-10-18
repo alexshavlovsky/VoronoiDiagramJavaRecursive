@@ -1,6 +1,6 @@
 package voronoy;
 
-import geometry.*;
+import geometry.Line2D;
 import geometry.Point;
 import gui.Canvas;
 
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static geometry.Utils.cmpE;
 import static geometry.Utils.comparePointYX;
 import static voronoy.ConvexHull.mergeHulls;
 
@@ -46,25 +47,49 @@ class Diagram {
         siteNode.put(p2, new HashSet<>());
     }*/
 
-    public Diagram(int x1, int y1) {
+    /*public Diagram(int x1, int y1) {
         this(new Point(x1, Y_EXPORT - y1));
-    }
+    }*/
 
 /*    public Diagram(int x1, int y1, int x2, int y2) {
         this(new Point(x1, Y_EXPORT - y1), new Point(x2, Y_EXPORT - y2));
     }*/
 
-    public EdgesIntersection getFirstIntersect(Edge inRay, geometry.Point pm) {
-        List<EdgesIntersection> left = siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e)).filter(i -> comparePointYX(i.node, pm) < 0).collect(Collectors.toList());
-        List<EdgesIntersection> right = siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e)).filter(i -> comparePointYX(i.node, pm) < 0).collect(Collectors.toList());
-        System.out.println(left+":"+right);
+    public EdgesIntersection getFirstIntersect(Edge inRay, Diagram dl, Diagram dr) {
+
+        List<EdgesIntersection> ei = Stream.of(
+                dl.siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e)),
+                dr.siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e))).
+                flatMap(x -> x).filter(i->i.node!=null).collect(Collectors.toList());
+        Optional<Double> mao = ei.stream().map(i->i.angle).max(Comparator.comparingDouble(a -> a));
+        if (!mao.isPresent()) return null;
+        ei = ei.stream().filter(i->cmpE(i.angle,mao.get())).collect(Collectors.toList());
+
+
+        EdgesIntersection l0 = dl.siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e)).max(Comparator.comparingDouble(e -> e.angle)).orElse(null);
+        EdgesIntersection r0 = dr.siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e)).max(Comparator.comparingDouble(e -> e.angle)).orElse(null);
+        System.out.println("ei:"+ei);
+
+        System.out.println("L:"+dl.siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e)).collect(Collectors.toList()));
+        System.out.println("R:"+dr.siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e)).collect(Collectors.toList()));
+
+        System.out.println("L>>>"+l0);
+        System.out.println("R>>>"+r0);
+        if (l0==null && r0==null) return null;
+        if (l0==null) return r0;
+        if (r0==null) return l0;
+        if (comparePointYX(l0.node,r0.node)>=0) return l0; else return r0;
+
+
+/*        System.out.println("L:"+l0);
+        System.out.println("R:"+r0);
         return Stream.of(
                 siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e)),
                 siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e))
         ).flatMap(x -> x).
                 filter(i -> comparePointYX(i.node, pm) < 0).
                 max((a, b) -> comparePointYX(a.node, b.node)).
-                orElse(null);
+                orElse(null);*/
     }
 
     static Color getColorFromInt(int i) {
@@ -79,30 +104,43 @@ class Diagram {
 
 
     static Diagram mergeDiagrams(Diagram d1, Diagram d2, Canvas pap) {
+        System.out.println("=====");
         ConvexHull h = mergeHulls(d1.hull, d2.hull);
         Diagram d = new Diagram(h);
+
+        for (Point p : d1.siteEdge.keySet()) {
+            if (!d.siteEdge.containsValue(p)) d.siteEdge.put(p,new ArrayList<>());
+            for (Edge edge : d1.siteEdge.get(p)) d.siteEdge.get(p).add(edge);
+        }
+
+        for (Point p : d2.siteEdge.keySet()) {
+            if (!d.siteEdge.containsValue(p)) d.siteEdge.put(p,new ArrayList<>());
+            for (Edge edge : d2.siteEdge.get(p)) d.siteEdge.get(p).add(edge);
+        }
+/*
         d.siteEdge.putAll(d1.siteEdge);
-        d.siteEdge.putAll(d2.siteEdge);
-        Point pm = new Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        d.siteEdge.putAll(d2.siteEdge);*/
         Edge inRay = new Edge(h.pivot[0].p1, h.pivot[0].p2);
         while (true) {
+            if (pap!=null) {
+                System.out.println("!!!");
+            }
             d.putEdge(inRay);
-            EdgesIntersection intersect = d.getFirstIntersect(inRay, pm);
+            EdgesIntersection intersect = d.getFirstIntersect(inRay, d1, d2);
             if (intersect == null) break;
             Point p3 = intersect.edge.getOpposite(intersect.site);
             boolean isLeft = intersect.site == inRay.p1;
             Edge outRay = (isLeft) ? new Edge(p3, inRay.p2) : new Edge(inRay.p1, p3);
-            if (pap!=null) {
-                System.out.println(isLeft);
+            d.putEdge(outRay);
+/*            if (pap != null) {
                 if (isLeft)
-                pap.addLine(inRay.toLine2D(1000), Color.BLACK);
+                    pap.addLine(inRay.toLine2D(1000), Color.BLACK);
                 else
                     pap.addLine(inRay.toLine2D(1000), Color.RED);
                 pap.addPoint(intersect.node, Color.BLACK, 16);
-            }
-            Node n = new Node(intersect.node, inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay, isLeft,d);
-
-            pm = intersect.node;
+            }*/
+            new Node(intersect.node, inRay.p1, inRay.p2, p3, inRay, intersect.edge, outRay, isLeft, d);
+            if (outRay.p1==h.pivot[1].p1 && outRay.p2==h.pivot[1].p2) break;
             inRay = outRay;
         }
         return d;
@@ -116,7 +154,8 @@ class Diagram {
         if (siteEdge.get(hull.halves[0].get(0)).size()>0) {
             Edge origin = siteEdge.get(hull.halves[0].get(0)).get(0);
             if (origin.n2==null) pap.addLine(origin.toLine2D(1000),Color.BLUE);
-            parse(siteEdge.get(hull.halves[0].get(0)).get(0).n2, pap);
+            parse(origin.n2, pap);
+            Node.parsed();
         }
         pap.repaint();
     }

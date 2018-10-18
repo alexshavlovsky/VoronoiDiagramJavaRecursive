@@ -1,11 +1,7 @@
 package voronoy;
 
 import geometry.Point;
-import geometry.Utils;
 import gui.Canvas;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 
 public class Voron {
@@ -13,19 +9,35 @@ public class Voron {
     public static void main(String[] args) {
         Canvas paper = new Canvas(900, 675, 50);
 
-        Diagram d= null;
-        Point[] p = { new Point(0.0, -2.0), new Point(-2.0, 0.0), new Point(0.0, 2.00001),new Point(2.0, 0.0)};
-//       Point[] p = { new Point(0.0, -2.0), new Point(2.0, 0.0), new Point(-2.0, 0.0), new Point(0.0, 2.0)};
+        Diagram d1;
+        d1 = new Diagram(new Point(0, 0));
+        d1 = Diagram.mergeDiagrams(d1 , new Diagram(new Point(0.1, 1)),null);
+//        d1 = Diagram.mergeDiagrams(d1 , new Diagram(new Point(2, 0)),null);
+
+        Diagram d2;
+        d2 = new Diagram(new Point(0.9, 1));
+        d2 = Diagram.mergeDiagrams(d2 , new Diagram(new Point(1, 0)),null);
+
+        Diagram d3 = Diagram.mergeDiagrams(d1 , d2,paper);
+        d3.draw(paper);
+//        d1.draw(paper);
+//        d2.draw(paper);
+  //      System.out.println(d3);
+
+//        Diagram d= null;
+        //Point[] p = { new Point(0.0, 0.0), new Point(0.0, 2.0), new Point(2.0, 0),new Point(2.0, 2.0)};
+//       Point[] p = { new Point(0.0, -2.0), new Point(2.0, 0.0), new Point(-2.0, 0.0)/*, new Point(0.0, 2.0)*/};
 //        Point[] p = { new Point(0.0, 0.0), new Point(2.0, 0.0), new Point(-2.0, 0.0), new Point(0.0, 2.0), new Point(0.0, -2.0) };
 //        Point[] p = { new Point(2.0, 1.0), new Point(2.0, -1.0), new Point(4.4, 2.2), new Point(4.4, -2.2), new Point(-0.4, 2.2), new Point(-0.4, -2.2) };
 
-        for (Point point : Arrays.stream(p).sorted(Utils::comparePointXY).collect(Collectors.toList())) {
+  /*     for (Point point : Arrays.stream(p).sorted(Utils::comparePointXY).collect(Collectors.toList())) {
             if (d == null) d = new Diagram(point);
             else d = Diagram.mergeDiagrams(d, new Diagram(point), null);
         }
 
         System.out.println(d);
-        d.draw(paper);
+        d.draw(paper);*/
+
 
 
 /*        Diagram d = new Diagram(145, 475);

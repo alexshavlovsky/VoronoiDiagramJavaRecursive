@@ -21,6 +21,7 @@ public class Node {
         this.in = in;
         this.edge = edge;
         this.out = out;
+        this.isLeft=isLeft;
         if (edge.n1 == null && edge.n2 == null) {
             if (isLeft) edge.n2 = this; else edge.n1 = this;
         }

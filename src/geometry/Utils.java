@@ -1,5 +1,7 @@
 package geometry;
 
+import voronoy.Edge;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +16,18 @@ public class Utils {
 
     public static boolean cmpE(double d1, double d2) {
         return (Math.abs(d1 - d2) < EPS);
+    }
+
+    public static boolean cmpG(double d0, double d) {
+        return d0 > d + EPS;
+    }
+
+    public static boolean cmpL(double d0, double d) {
+        return d0 < d - EPS;
+    }
+
+    public static boolean cmpGL(double d0, double d1, double d2) {
+        return cmpG(d0, d1) && cmpL(d0, d2);
     }
 
     public static boolean cmpGE(double d1, double d2) {
@@ -73,8 +87,9 @@ public class Utils {
     }
 
     public static Line2D LineCircleIntersect(LineCommon line, Point c0, double r0) {
-        double T = line.C + c0.x * line.A + c0.y * line.B;
         double AB2 = line.A * line.A + line.B * line.B;
+//        if (AB2 == 0) return null;
+        double T = line.C + c0.x * line.A + c0.y * line.B;
         double d2 = r0 * r0 - T * T / AB2;
         double m = Math.sqrt(d2 / AB2);
         double x0 = c0.x - line.A * T / AB2;
@@ -89,6 +104,23 @@ public class Utils {
         double dy = p1.y - p2.y;
         double n = Math.sqrt(dx * dx + dy * dy);
         return new LineCommon(dy / n, dx / n, (p1.x * p2.y - p2.x * p1.y) / n);
+    }
+
+    public static double getRayToEdgeAngle(Edge r, Edge e) {
+        return e.A * r.A + e.B * r.B;
+    }
+
+    public static LineCommon getVectorByEdge(Edge e, Point p0) {
+        //super(p1.x - p2.x, p1.y - p2.y);
+        return e.isBasePoint(p0) ? new LineCommon(-e.B, e.A) : new LineCommon(e.B, -e.A);
+    }
+
+    public static LineCommon getVectorByRay(Edge ray) {
+        return new LineCommon(-ray.B, ray.A);
+    }
+
+    public static double getCosAngle(LineCommon l1, LineCommon l2) {
+        return l1.A * l2.A + l1.B * l2.B;
     }
 
     public static LineCommon translateLineCommon(LineCommon lineCommon, double dx, double dy) {

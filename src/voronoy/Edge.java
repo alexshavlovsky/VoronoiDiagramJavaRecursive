@@ -7,7 +7,7 @@ import geometry.Point;
 import static geometry.Utils.LineCircleIntersect;
 import static geometry.Utils.getMidPoint;
 
-class Edge extends LineCommon {
+public class Edge extends LineCommon {
 
     Point p1, p2;
     Node n1, n2;
@@ -25,6 +25,10 @@ class Edge extends LineCommon {
 
     Point getOpposite(Point p) {
         return p1 == p ? p2 : p1;
+    }
+
+    public boolean isBasePoint(Point p) {
+        return p1 == p;
     }
 
     Line2D toLine2D(double r0) {
