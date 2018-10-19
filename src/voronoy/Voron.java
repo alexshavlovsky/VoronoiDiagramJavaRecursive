@@ -1,72 +1,43 @@
 package voronoy;
 
 import geometry.Point;
-import gui.Canvas;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class Voron {
 
     public static void main(String[] args) {
-        Canvas paper = new Canvas(900, 675, 50);
+        /*Point org=new Point(2,0);
+        Point p1=new Point(3,-1);
+        Point p2=new Point(3,1);
+        Point p=new Point(1,0);
 
-        Diagram d1;
-        d1 = new Diagram(new Point(0, 0));
-        d1 = Diagram.mergeDiagrams(d1 , new Diagram(new Point(0.1, 1)),null);
-//        d1 = Diagram.mergeDiagrams(d1 , new Diagram(new Point(2, 0)),null);
+        Edge e = new Edge(p1,p2,org);
+        e.drawVector();
+        paper.addPoint(org, Color.BLUE,5);
+        paper.addPoint(p1, Color.RED,5);
+        paper.addPoint(p2, Color.RED,5);
+        System.out.println(e.getDistToOrigin(p));*/
+        int z=2200;
+        while (true) {
+            Random r = new Random(z);
+            int n = 5;
+            List<Point> pts = new ArrayList<>();
 
-        Diagram d2;
-        d2 = new Diagram(new Point(0.9, 1));
-        d2 = Diagram.mergeDiagrams(d2 , new Diagram(new Point(1, 0)),null);
+            for (int i = 0; i < n; i++) pts.add(new Point(-4 + r.nextFloat() * 8, -4 + r.nextFloat() * 8));
 
-        Diagram d3 = Diagram.mergeDiagrams(d1 , d2,paper);
-        d3.draw(paper);
-//        d1.draw(paper);
-//        d2.draw(paper);
-  //      System.out.println(d3);
+   //     System.out.println(
+//                pts.stream().map(p -> 100+(int) (p.x*10) + "," + (600 - (int) (p.y*10))).collect(Collectors.joining(",", "{\"sites\":[", "],\"queries\":[]}")));
 
-//        Diagram d= null;
-        //Point[] p = { new Point(0.0, 0.0), new Point(0.0, 2.0), new Point(2.0, 0),new Point(2.0, 2.0)};
-//       Point[] p = { new Point(0.0, -2.0), new Point(2.0, 0.0), new Point(-2.0, 0.0)/*, new Point(0.0, 2.0)*/};
-//        Point[] p = { new Point(0.0, 0.0), new Point(2.0, 0.0), new Point(-2.0, 0.0), new Point(0.0, 2.0), new Point(0.0, -2.0) };
-//        Point[] p = { new Point(2.0, 1.0), new Point(2.0, -1.0), new Point(4.4, 2.2), new Point(4.4, -2.2), new Point(-0.4, 2.2), new Point(-0.4, -2.2) };
 
-  /*     for (Point point : Arrays.stream(p).sorted(Utils::comparePointXY).collect(Collectors.toList())) {
-            if (d == null) d = new Diagram(point);
-            else d = Diagram.mergeDiagrams(d, new Diagram(point), null);
+
+     //   pts.forEach(t->paper.addPoint(t, Color.RED, 8));
+            Diagram d = new Diagram(pts,z);
+            z++;
         }
-
-        System.out.println(d);
-        d.draw(paper);*/
-
-
-
-/*        Diagram d = new Diagram(145, 475);
-        Diagram d2 = new Diagram(248, 209);
-        Diagram d3 = new Diagram(400, 300);
-
-        Diagram d4 = new Diagram(500, 500);
-        Diagram d5 = new Diagram(540, 100);
-        Diagram d6 = new Diagram(543,140);
-        Diagram d7 = new Diagram(550,170);
-        Diagram d8 = new Diagram(585,189);
-        Diagram d9 = new Diagram(590,195);
-        Diagram d10 = new Diagram(610,200);
-
-        d = mergeDiagrams(d, d2, null);
-        d = mergeDiagrams(d, d3, null);
-
-       d4 = mergeDiagrams(d4, d5, null);
-        d4 = mergeDiagrams(d4, d6, null);
-        d4 = mergeDiagrams(d4, d7, null);
-        d4 = mergeDiagrams(d4, d8, null);
-        d4 = mergeDiagrams(d4, d9, null);
-        d4 = mergeDiagrams(d4, d10, null);
-        d4 = mergeDiagrams(d4, new Diagram(615,140), null);
-
-        d=mergeDiagrams(d,d4,null);
-        System.out.println(d);
-        d.draw(paper);
-        System.out.println(d.exportSites());*/
+      //  d.draw(paper);
     }
 
 }

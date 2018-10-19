@@ -2,13 +2,10 @@ package voronoy;
 
 import geometry.Line2D;
 import geometry.Point;
-import geometry.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static geometry.Utils.*;
 
@@ -16,31 +13,12 @@ class ConvexHull {
     ArrayList<Point>[] halves;
     Line2D[] pivot = new Line2D[2];
 
-    @Override
-    public String toString() {
-        return "ConvexHull{" +
-                "halves=" + Arrays.toString(halves) +
-                ", pivot=" + Arrays.toString(pivot) +
-                '}';
-    }
-
     ConvexHull(List<Point> s) {
         halves = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
-        s.sort(Utils::comparePointXY);
         s.forEach(this::putPoint);
     }
 
-    ConvexHull(ConvexHull ch) {
-        halves = new ArrayList[]{new ArrayList<>(ch.halves[0]), new ArrayList<>(ch.halves[1])};
-    }
-
-    ConvexHull(List<Point> s, int i1, int i2) {
-        halves = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
-        IntStream.range(i1, i2).mapToObj(s::get).forEach(this::putPoint);
-    }
-
-    static ConvexHull mergeHulls(ConvexHull ch1, ConvexHull ch2) {
-        ConvexHull ch = new ConvexHull(ch1);
+    static ConvexHull mergeHulls(ConvexHull ch, ConvexHull ch2) {
         int[] m = new int[]{ch.halves[0].size(), ch.halves[1].size()};
         for (int i = 0; i < 2; i++) {
             for (Point p : ch2.halves[i]) ch.putPointHalf(p, m, i);
@@ -65,15 +43,11 @@ class ConvexHull {
         for (int i = 0; i < 2; i++) putPointHalf(p, null, i);
     }
 
-    List<Point> asList() {
-        List<Point> r = new ArrayList<>();
-        int s0 = halves[0].size();
-        int s1 = halves[1].size();
-        Stream.of(
-                halves[0].stream().limit(s0 - 1),
-                IntStream.range(1, s1).map(i -> s1 - i).mapToObj(halves[1]::get)
-        ).flatMap(p -> p).forEach(r::add);
-        return r;
+    @Override
+    public String toString() {
+        return "ConvexHull{" +
+                "halves=" + Arrays.toString(halves) +
+                ", pivot=" + Arrays.toString(pivot) +
+                '}';
     }
-
 }
