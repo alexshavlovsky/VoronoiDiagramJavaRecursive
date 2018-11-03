@@ -89,7 +89,7 @@ public class Canvas extends JComponent {
         newLineButton.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent de) {
                 int x1 = (int) (Math.random()*320);
                 int x2 = (int) (Math.random()*320);
                 int y1 = (int) (Math.random()*200);
@@ -101,7 +101,7 @@ public class Canvas extends JComponent {
         clearButton.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent de) {
                 comp.clearLines();
             }
         });

@@ -9,13 +9,14 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    public static Canvas paper = new Canvas(900, 600, 15);
+    public static Canvas paper = new Canvas(900, 600, 80);
 
     private Utils() {
         throw new AssertionError();
     }
 
-    static final double EPS = 10e-8;
+    static final double EPS = 10e-5;
+    public static boolean debugFlag=false;
 
     public static boolean cmpE(double d1, double d2) {
         return (Math.abs(d1 - d2) < EPS);
@@ -25,8 +26,8 @@ public class Utils {
         return cmpE(d1, d2) || (d1 > d2);
     }
 
-    public static boolean cmpG(double d1, double d2) {
-        return !cmpE(d1, d2) && (d1 > d2);
+    public static boolean cmpL(double d1, double d2) {
+        return !cmpE(d1, d2) && (d1 < d2);
     }
 
     public static boolean cmpLE(double d1, double d2) {
@@ -76,7 +77,7 @@ public class Utils {
         return new Point((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0);
     }
 
-    public static Point LinesIntersect(LineCommon l1, LineCommon l2) {
+    public static Point getLinesIntersectionPoint(LineCommon l1, LineCommon l2) {
         double den = l1.A * l2.B - l1.B * l2.A;
         return new Point((-l2.B * l1.C + l1.B * l2.C) / den, (l2.A * l1.C - l1.A * l2.C) / den);
     }
@@ -109,6 +110,11 @@ public class Utils {
         return translatePoint(p, e.B / EPS, -e.A / EPS);
     }
 
+    public static Point getNegInfiniteOrigin(Point p, Edge e) {
+        return translatePoint(p, -e.B / EPS, e.A / EPS);
+    }
+
+
     public static LineCommon translateLineCommon(LineCommon lineCommon, double dx, double dy) {
         return new LineCommon(lineCommon.A, lineCommon.B, lineCommon.C - dx * lineCommon.A - dy * lineCommon.B);
     }
@@ -133,14 +139,14 @@ public class Utils {
         return cmpE(p1.x, p2.x) && cmpE(p1.y, p2.y);
     }
 
-    static Point rotatePoint(Point p,Point p0, double a) {
+    static Point rotatePoint(Point p, Point p0, double a) {
         return new Point(
                 p0.x + (p.x - p0.x) * Math.cos(a) - (p.y - p0.y) * Math.sin(a),
                 p0.y + (p.y - p0.y) * Math.cos(a) + (p.x - p0.x) * Math.sin(a)
         );
     }
 
-    static public List<Point> rotatePoints( List<Point> list,Point p0, double a) {
+    static public List<Point> rotatePoints(List<Point> list, Point p0, double a) {
         return list.stream().map(p -> rotatePoint(p, p0, a)).collect(Collectors.toList());
     }
 
@@ -149,4 +155,50 @@ public class Utils {
         double i = e.A * r.B - e.B * r.A;
         return cmpE(i, 0) ? null : (isLeft ? o / i : -o / i);
     }
+
+    // line segments intersection
+    private static Line2D getBox(Point p1, Point p2) {
+        return new Line2D(
+                new Point(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y)),
+                new Point(Math.max(p1.x, p2.x), Math.max(p1.y, p2.y)));
+    }
+
+    private static boolean isBoxesIntersect(Point p1, Point p2, Point p3, Point p4) {
+        Line2D a = getBox(p1, p2);
+        Line2D b = getBox(p3, p4);
+        return a.p1.x <= b.p2.x && a.p2.x >= b.p1.x && a.p1.y <= b.p2.y && a.p2.y >= b.p1.y;
+    }
+
+    public static double crossDen(double a, double b, double c, double d) {
+        return a * d - b * c;
+    }
+
+    private static boolean lineSegmentIntersectsLine(Line2D a, Line2D b) {
+        double dx = a.p2.x - a.p1.x;
+        double dy = a.p2.y - a.p1.y;
+        double cd1 = crossDen(dx, dy, b.p1.x - a.p1.x, b.p1.y - a.p1.y);
+        double cd2 = crossDen(dx, dy, b.p2.x - a.p1.x, b.p2.y - a.p1.y);
+        return cmpE(cd1, 0) || cmpE(cd2, 0) || (cd1 < 0 ^ cd2 < 0);
+    }
+
+    public static boolean doLinesIntersect(Point p1, Point p2, Point p3, Point p4) {
+        Line2D a = new Line2D(p1, p2);
+        Line2D b = new Line2D(p3, p4);
+        boolean tmp1=isBoxesIntersect(p1, p2, p3, p4);
+        boolean tmp2=lineSegmentIntersectsLine(a, b);
+        boolean tmp3=lineSegmentIntersectsLine(b, a);
+        return isBoxesIntersect(p1, p2, p3, p4) && lineSegmentIntersectsLine(a, b) && lineSegmentIntersectsLine(b, a);
+    }
+
+    public static boolean isNotEdgesIntersect(Edge e1, Edge e2) {
+        return !doLinesIntersect(e1.o1, e1.o2, e2.o1, e2.o2);
+    }
+
+    public static double pointToPointDistSqr(Point p1, Point p2) {
+        if (p2==null) return Double.POSITIVE_INFINITY;
+        double dx = p2.x - p1.x;
+        double dy = p2.y - p1.y;
+        return dx * dx + dy * dy;
+    }
+
 }
