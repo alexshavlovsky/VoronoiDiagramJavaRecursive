@@ -44,30 +44,30 @@ class Diagram {
         siteEdge.put(p2, new ArrayList<>(Arrays.asList(e)));
     }
 
-    public Diagram (List<Point> s,int z) {
+    public Diagram(List<Point> s) throws Exception {
         s.sort(Utils::comparePointXY);
-        Diagram d = Recursive(s, 0,s.size(), z);
-        this.hull=d.hull;
-        this.siteEdge=d.siteEdge;
+        Diagram d = Recursive(s, 0, s.size());
+        this.hull = d.hull;
+        this.siteEdge = d.siteEdge;
     }
 
-    private Diagram Recursive(List<Point> s, int i1, int i2, int z) {
+    private Diagram Recursive(List<Point> s, int i1, int i2) throws Exception {
         int n = i2 - i1;
         if (n == 1) return new Diagram(s.get(i1));
         if (n == 2) return new Diagram(s.get(i1), s.get(i1 + 1));
-        return mergeDiagrams(Recursive(s, i1, i1 + n / 2,z), Recursive(s, i1 + n / 2, i2,z),""+z+":"+i1+"/"+i2);
+        return mergeDiagrams(Recursive(s, i1, i1 + n / 2), Recursive(s, i1 + n / 2, i2));
     }
 
     public List<EdgesIntersection> getFirstIntersect(Edge inRay, Diagram d1, Diagram d2) {
-        List<EdgesIntersection> il = d1.siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e,true)).
-                filter(i -> i.node != null).filter(i -> cmpG(inRay.getDistToOrigin(i.node),0)).collect(Collectors.toList());
-        List<EdgesIntersection> ir = d2.siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e,false)).
-                filter(i -> i.node != null).filter(i -> cmpG(inRay.getDistToOrigin(i.node),0)).collect(Collectors.toList());
-        if (il.size()==0 && ir.size()==0) return null;
-        Point mn = Stream.of(il.stream(),ir.stream()).flatMap(x->x).min(Comparator.comparingDouble(a -> inRay.getDistToOrigin(a.node))).get().node;
-        EdgesIntersection l = il.stream().filter(i->pointsEqual(i.node,mn)).max(comparingDouble(a -> a.angle)).orElse(null);
-        EdgesIntersection r = ir.stream().filter(i->pointsEqual(i.node,mn)).max(comparingDouble(a -> a.angle)).orElse(null);
-        return Stream.of(l,r).filter(Objects::nonNull).collect(Collectors.toList());
+        List<EdgesIntersection> il = d1.siteEdge.get(inRay.p1).stream().map(e -> new EdgesIntersection(inRay.p1, inRay, e, true)).
+                filter(i -> i.node != null).filter(i -> cmpG(inRay.getDistToOrigin(i.node), 0)).collect(Collectors.toList());
+        List<EdgesIntersection> ir = d2.siteEdge.get(inRay.p2).stream().map(e -> new EdgesIntersection(inRay.p2, inRay, e, false)).
+                filter(i -> i.node != null).filter(i -> cmpG(inRay.getDistToOrigin(i.node), 0)).collect(Collectors.toList());
+        if (il.size() == 0 && ir.size() == 0) return null;
+        Point mn = Stream.of(il.stream(), ir.stream()).flatMap(x -> x).min(Comparator.comparingDouble(a -> inRay.getDistToOrigin(a.node))).get().node;
+        EdgesIntersection l = il.stream().filter(i -> pointsEqual(i.node, mn)).max(comparingDouble(a -> a.angle)).orElse(null);
+        EdgesIntersection r = ir.stream().filter(i -> pointsEqual(i.node, mn)).max(comparingDouble(a -> a.angle)).orElse(null);
+        return Stream.of(l, r).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     void putEdge(Edge edge) {
@@ -76,30 +76,30 @@ class Diagram {
     }
 
 
-    static Diagram mergeDiagrams(Diagram d1, Diagram d2, String msg) {
+    static Diagram mergeDiagrams(Diagram d1, Diagram d2) throws Exception {
         ConvexHull h = mergeHulls(d1.hull, d2.hull);
         Diagram d = new Diagram(h);
         d.siteEdge.putAll(d1.siteEdge);
         d.siteEdge.putAll(d2.siteEdge);
         Edge inRay = new Edge(h.pivot[0].p1, h.pivot[0].p2);
         List<EdgesIntersection> nodes = new ArrayList<>();
-  //      int maxc=30;
+        //      int maxc=30;
         outer:
         while (true) {
-       //     if (maxc==0) break ;
-      //      maxc--;
-       //     inRay.drawVector();
+            //     if (maxc==0) break ;
+            //      maxc--;
+            //     inRay.drawVector();
             List<EdgesIntersection> ei = d.getFirstIntersect(inRay, d1, d2);
-      //      System.out.println(inRay.getDistToOrigin(ei.get(0).node));
-            if (ei==null) throw new AssertionError(msg);
-    //        if (ei==null) break ;
+            //      System.out.println(inRay.getDistToOrigin(ei.get(0).node));
+            if (ei == null) throw new Exception();
+            //        if (ei==null) break ;
             for (EdgesIntersection i : ei) {
                 if (i.isLeft) {
                     i.next = i.edge.getOpposite(i.inRay.p1);
-                    i.outRay = new Edge(i.next, i.inRay.p2,i.node);
+                    i.outRay = new Edge(i.next, i.inRay.p2, i.node);
                 } else {
                     i.next = i.edge.getOpposite(i.inRay.p2);
-                    i.outRay = new Edge(i.inRay.p1, i.next,i.node);
+                    i.outRay = new Edge(i.inRay.p1, i.next, i.node);
                 }
                 nodes.add(i);
                 inRay = i.outRay;
@@ -109,7 +109,7 @@ class Diagram {
         if (nodes.size() > 0) d.putEdge(nodes.get(0).inRay);
         else d.putEdge(inRay);
         for (EdgesIntersection i : nodes) {
-        //    System.out.println(i);
+            //    System.out.println(i);
             d.putEdge(i.outRay);
             new Node(i.node, i.inRay.p1, i.inRay.p2, i.next, i.inRay, i.edge, i.outRay, i.isLeft);
         }
@@ -128,9 +128,8 @@ class Diagram {
             Edge.parsed();
             Node.parsed();
         }
-        for (Map.Entry<Point, List<Edge>> pointListEntry : siteEdge.entrySet()) {
+        for (Map.Entry<Point, List<Edge>> pointListEntry : siteEdge.entrySet())
             pointListEntry.setValue(pointListEntry.getValue().stream().filter(Edge::visited).collect(Collectors.toList()));
-        }
         pap.repaint();
     }
 
@@ -147,11 +146,11 @@ class Diagram {
         } else if (inEdge) {
             l.p1 = p;
             res = e.n1;
-   //         pap.addLine(l, Color.BLUE);
+            //         pap.addLine(l, Color.BLUE);
         } else {
             l.p2 = p;
             res = e.n2;
-    //        pap.addLine(l, Color.RED);
+            //        pap.addLine(l, Color.RED);
         }
         return res;
     }
@@ -160,9 +159,9 @@ class Diagram {
         if (node == null || node.visited()) return;
         else node.markVisited();
         pap.addPoint(node.p, Color.blue, 8);
-        parse(drawEdge(node.in, node.p, pap, Color.ORANGE, true),pap);
-        parse(drawEdge(node.out, node.p, pap, Color.GREEN, false),pap);
-        parse(drawEdge(node.edge, node.p, pap, Color.CYAN, !node.isLeft),pap);
+        parse(drawEdge(node.in, node.p, pap, Color.ORANGE, true), pap);
+        parse(drawEdge(node.out, node.p, pap, Color.GREEN, false), pap);
+        parse(drawEdge(node.edge, node.p, pap, Color.CYAN, !node.isLeft), pap);
     }
 
 }

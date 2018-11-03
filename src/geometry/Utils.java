@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    public static Canvas paper = new Canvas(900, 600, 50);
+    public static Canvas paper = new Canvas(900, 600, 15);
 
     private Utils() {
         throw new AssertionError();
     }
 
-    static final double EPS = 10e-9;
+    static final double EPS = 10e-8;
 
     public static boolean cmpE(double d1, double d2) {
         return (Math.abs(d1 - d2) < EPS);
@@ -73,7 +73,7 @@ public class Utils {
     }
 
     public static Point getMidPoint(Point p1, Point p2) {
-        return new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+        return new Point((p1.x + p2.x) / 2.0, (p1.y + p2.y) / 2.0);
     }
 
     public static Point LinesIntersect(LineCommon l1, LineCommon l2) {
@@ -131,6 +131,17 @@ public class Utils {
 
     public static boolean pointsEqual(Point p1, Point p2) {
         return cmpE(p1.x, p2.x) && cmpE(p1.y, p2.y);
+    }
+
+    static Point rotatePoint(Point p,Point p0, double a) {
+        return new Point(
+                p0.x + (p.x - p0.x) * Math.cos(a) - (p.y - p0.y) * Math.sin(a),
+                p0.y + (p.y - p0.y) * Math.cos(a) + (p.x - p0.x) * Math.sin(a)
+        );
+    }
+
+    static public List<Point> rotatePoints( List<Point> list,Point p0, double a) {
+        return list.stream().map(p -> rotatePoint(p, p0, a)).collect(Collectors.toList());
     }
 
     public static Double getRayToEdgeCtg(LineCommon r, LineCommon e, boolean isLeft) {

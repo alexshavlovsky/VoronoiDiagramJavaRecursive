@@ -1,16 +1,19 @@
 package gui;
 
-import geometry.*;
+import geometry.Line2D;
 import geometry.Point;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 
 public class Canvas extends JComponent {
 
+    public boolean closed=false;
     private final ArrayList<Drawable> figures = new ArrayList<>();
     double x0,y0,z;
 
@@ -43,6 +46,14 @@ public class Canvas extends JComponent {
     }
 
     public Canvas(int x, int y, double z) {
+
+        WindowAdapter windowAdapter = new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent windowEvent) {
+                closed = true;
+            }
+        };
+
         this.x0 = x / 2;
         this.y0 = y / 2;
         this.z = z;
@@ -51,6 +62,7 @@ public class Canvas extends JComponent {
         this.setPreferredSize(new Dimension(x, y));
         testFrame.getContentPane().add(this, BorderLayout.CENTER);
         testFrame.pack();
+        testFrame.addWindowListener(windowAdapter);
         testFrame.setVisible(true);
     }
 

@@ -1,43 +1,71 @@
 package voronoy;
 
 import geometry.Point;
+import geometry.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static geometry.Utils.paper;
+
 public class Voron {
 
     public static void main(String[] args) {
-        /*Point org=new Point(2,0);
-        Point p1=new Point(3,-1);
-        Point p2=new Point(3,1);
-        Point p=new Point(1,0);
 
-        Edge e = new Edge(p1,p2,org);
-        e.drawVector();
-        paper.addPoint(org, Color.BLUE,5);
-        paper.addPoint(p1, Color.RED,5);
-        paper.addPoint(p2, Color.RED,5);
-        System.out.println(e.getDistToOrigin(p));*/
-        int z=2200;
-        while (true) {
-            Random r = new Random(z);
-            int n = 5;
+
+      /*  while (!paper.closed) {
             List<Point> pts = new ArrayList<>();
+            Random r0 = new Random();
+            int i0=404869835;
+            Random r = new Random(i0);
+            int n = 5;
 
             for (int i = 0; i < n; i++) pts.add(new Point(-4 + r.nextFloat() * 8, -4 + r.nextFloat() * 8));
 
-   //     System.out.println(
+            Diagram d = null;
+            try {
+                d = new Diagram(Utils.rotatePoints(pts, new Point(0, 0), 0));
+            } catch (Exception e) {
+                System.out.println("merging error: "+i0);
+            }
+        }*/
+
+        //     System.out.println(
 //                pts.stream().map(p -> 100+(int) (p.x*10) + "," + (600 - (int) (p.y*10))).collect(Collectors.joining(",", "{\"sites\":[", "],\"queries\":[]}")));
 
+        List<Point> pts = new ArrayList<>();
+        Random r0 = new Random();
+        int i0=404869835;
+        Random r = new Random(i0);
+        int n = 5;
+
+        for (int i = 0; i < n; i++) pts.add(new Point(-4 + r.nextFloat() * 8, -4 + r.nextFloat() * 8));
 
 
-     //   pts.forEach(t->paper.addPoint(t, Color.RED, 8));
-            Diagram d = new Diagram(pts,z);
-            z++;
+       double a=3.30;
+        int m=0;
+        while (!paper.closed) {
+
+            Diagram d = null;
+            try {
+                d = new Diagram(Utils.rotatePoints(pts, new Point(0, 0), a));
+            } catch (Exception e) {
+                m++;
+                System.out.println("merging error: "+m+"/"+a+"="+m/a);
+            }
+            if (d!=null) {
+                paper.clear();
+                d.draw(paper);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+             a = a + 0.01;
+
         }
-      //  d.draw(paper);
     }
 
 }
