@@ -6,7 +6,7 @@ import geometry.Point;
 import java.awt.*;
 
 class DrawableLine extends Line2D implements Drawable{
-    Color color;
+    private Color color;
 
     DrawableLine(Point p1, Point p2, Color color) {
         super(p1,p2);

@@ -1,20 +1,19 @@
-package voronoy;
+package voronoi;
 
 import geometry.Line2D;
 import geometry.Point;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static geometry.Utils.*;
 
 class ConvexHull {
-    ArrayList<Point>[] halves;
+    private ArrayList<Point>[] halves;
     Line2D[] pivot = new Line2D[2];
 
     ConvexHull(List<Point> s) {
-        halves = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
+        halves = new ArrayList[]{new ArrayList(), new ArrayList()};
         s.forEach(this::putPoint);
     }
 
@@ -43,11 +42,4 @@ class ConvexHull {
         for (int i = 0; i < 2; i++) putPointHalf(p, null, i);
     }
 
-    @Override
-    public String toString() {
-        return "ConvexHull{" +
-                "halves=" + Arrays.toString(halves) +
-                ", pivot=" + Arrays.toString(pivot) +
-                '}';
-    }
 }

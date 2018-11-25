@@ -5,8 +5,8 @@ import geometry.Point;
 import java.awt.*;
 
 class DrawablePoint extends Point implements Drawable {
-    Color color;
-    int size;
+    private Color color;
+    private int size;
 
     DrawablePoint(Point p, Color color, int size) {
         super(p.x, p.y);
