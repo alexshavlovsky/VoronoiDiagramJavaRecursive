@@ -8,33 +8,50 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    public static Canvas paper = new Canvas(900, 600, 50);
+    public static Canvas paper = new Canvas(900, 600, 80);
 
     private Utils() {
         throw new AssertionError();
     }
 
+//    private static final double EPS = 10e-6;
+//    private static final double DEPS = 10e-9;
+//    private static final double INFINITY = 10e4;
+//            return !doLinesIntersect(e.i[0], e.i[1], p1, p2);
+
+
     private static final double EPS = 10e-6;
+    private static final double DEPS = 10e-9;
+    private static final double INFINITY = 10e4;
 
-    public static boolean cmpE(double d1, double d2) {
-        return (Math.abs(d1 - d2) < EPS);
+//    private static final double EPS = 10e-9;
+//    private static final double DEPS = 10e-9;
+//    private static final double INFINITY = 10e6;
+
+
+    public static boolean cmpZ(double d) {
+        return (Math.abs(d) < EPS);
     }
 
-    public static boolean cmpGE(double d1, double d2) {
-        return cmpE(d1, d2) || (d1 > d2);
+    public static boolean cmpZ2(double d) {
+        return (Math.abs(d) < DEPS);
     }
 
-    public static boolean cmpLE(double d1, double d2) {
-        return cmpE(d1, d2) || (d1 < d2);
+    public static boolean cmpGZ(double d) {
+        return d > DEPS;
+    }
+
+    public static boolean cmpLZ(double d) {
+        return d < -DEPS;
     }
 
     private static int compareX(double x1, double x2) {
-        if (cmpE(x1, x2)) return 0;
+        if (Math.abs(x1 - x2) < DEPS) return 0;
         return (x1 < x2) ? -1 : 1;
     }
 
     private static int compareY(double y1, double y2) {
-        if (cmpE(y1, y2)) return 0;
+        if (Math.abs(y1 - y2) < DEPS) return 0;
         return (y1 < y2) ? -1 : 1;
     }
 
@@ -52,8 +69,8 @@ public class Utils {
     }
 
     public static Point getLinesIntersectionPoint(LineCommon l1, LineCommon l2) {
-        double den = l1.A * l2.B - l1.B * l2.A;
-        return new Point((-l2.B * l1.C + l1.B * l2.C) / den, (l2.A * l1.C - l1.A * l2.C) / den);
+        double den = cross(l1.A, l1.B, l2.A, l2.B);
+        return cmpZ2(den) ? null : new Point(cross(l1.B, l2.B, l1.C, l2.C) / den, -cross(l1.A, l2.A, l1.C, l2.C) / den);
     }
 
     private static Point translatePoint(Point p, double dx, double dy) {
@@ -61,17 +78,13 @@ public class Utils {
     }
 
     public static Point shiftPointToPoint(Point p, Point p0, double k) {
-        double dx = p.x - p0.x;
-        double dy = p.y - p0.y;
-        return translatePoint(p0, dx * k, dy * k);
+        return translatePoint(p0, (p.x - p0.x) * k, (p.y - p0.y) * k);
     }
 
-    public static Point getInfiniteOrigin(Point p, Edge e) {
-        return translatePoint(p, e.B / EPS, -e.A / EPS);
-    }
-
-    public static Point getNegInfiniteOrigin(Point p, Edge e) {
-        return translatePoint(p, -e.B / EPS, e.A / EPS);
+    public static Point[] getInfiniteOrigins(Point p, Edge e) {
+        double dx = e.B * INFINITY;
+        double dy = -e.A * INFINITY;
+        return new Point[]{translatePoint(p, dx, dy), translatePoint(p, -dx, -dy)};
     }
 
     private static Point rotatePoint(Point p, Point p0, double a) {
@@ -85,35 +98,34 @@ public class Utils {
         return list.stream().map(p -> rotatePoint(p, p0, a)).collect(Collectors.toList());
     }
 
-    // line segments intersection
-    private static Line2D getBox(Point p1, Point p2) {
-        return new Line2D(
-                new Point(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y)),
-                new Point(Math.max(p1.x, p2.x), Math.max(p1.y, p2.y)));
-    }
-
-    private static boolean isBoxesIntersect(Point p1, Point p2, Point p3, Point p4) {
-        Line2D a = getBox(p1, p2);
-        Line2D b = getBox(p3, p4);
-        return a.p1.x <= b.p2.x && a.p2.x >= b.p1.x && a.p1.y <= b.p2.y && a.p2.y >= b.p1.y;
-    }
-
-    public static double crossDen(double a, double b, double c, double d) {
+    public static double cross(double a, double b, double c, double d) {
+        double t1 = a * d;
+        double t2 = b * c;
+        boolean tt=t1>t2;
+        double t3 = t1 - t2;
         return a * d - b * c;
     }
 
     private static boolean lineSegmentIntersectsLine(Line2D a, Line2D b) {
         double dx = a.p2.x - a.p1.x;
         double dy = a.p2.y - a.p1.y;
-        double cd1 = crossDen(dx, dy, b.p1.x - a.p1.x, b.p1.y - a.p1.y);
-        double cd2 = crossDen(dx, dy, b.p2.x - a.p1.x, b.p2.y - a.p1.y);
-        return cmpE(cd1, 0) || cmpE(cd2, 0) || (cd1 < EPS ^ cd2 < EPS);
+        double cd1 = cross(dx, dy, b.p1.x - a.p1.x, b.p1.y - a.p1.y);
+        double cd2 = cross(dx, dy, b.p2.x - a.p1.x, b.p2.y - a.p1.y);
+        boolean b1=cmpZ(cd1);
+        boolean b2=cmpZ(cd2);
+        boolean b3=cd1 < 0 ^ cd2 < 0;
+        return cmpZ(cd1) ||
+                cmpZ(cd2) ||
+                (cd1 < 0 ^ cd2 < 0);
     }
 
     public static boolean doLinesIntersect(Point p1, Point p2, Point p3, Point p4) {
         Line2D a = new Line2D(p1, p2);
         Line2D b = new Line2D(p3, p4);
-        return isBoxesIntersect(p1, p2, p3, p4) && lineSegmentIntersectsLine(a, b) && lineSegmentIntersectsLine(b, a);
+        boolean b1 = lineSegmentIntersectsLine(a, b);
+        boolean b2 = lineSegmentIntersectsLine(b, a);
+        return lineSegmentIntersectsLine(a, b) &&
+                lineSegmentIntersectsLine(b, a);
     }
 
 }

@@ -11,15 +11,18 @@ import java.util.ArrayList;
 
 
 public class Canvas extends JComponent {
-
+    final static BasicStroke stroke = new BasicStroke(0.7f);
+    final static BasicStroke boldStroke = new BasicStroke(2.0f);
     public boolean closed = false;
     private final ArrayList<Drawable> figures = new ArrayList<>();
-    private double x0, y0, z;
+    double x0;
+    double y0;
+    public double z;
 
 
-    public void addLine(Line2D l, Color c) {
+    public void addLine(Line2D l, Color c,boolean bold) {
         if (l == null) return;
-        figures.add(new DrawableLine(l.p1, l.p2, c));
+        figures.add(new DrawableLine(l.p1, l.p2, c, bold));
     }
 
     public void addPoint(Point p, Color c, int s) {

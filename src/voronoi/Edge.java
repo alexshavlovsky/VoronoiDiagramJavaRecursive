@@ -10,7 +10,7 @@ import static geometry.Utils.*;
 public class Edge extends LineCommon {
     private Point p1, p2;
     Point o1, o2;
-    Point i1, i2;
+    Point[] i;
 
     Edge(Point p1, Point p2) {
         super(p1.x - p2.x, p1.y - p2.y);
@@ -21,10 +21,9 @@ public class Edge extends LineCommon {
         A = A / n;
         B = B / n;
         C = -(mp.x * A + mp.y * B);
-        o1 = getInfiniteOrigin(mp, this);
-        o2 = getNegInfiniteOrigin(mp, this);
-        i1 = o1;
-        i2 = o2;
+        i = getInfiniteOrigins(mp, this);
+        o1 = i[0];
+        o2 = i[1];
     }
 
     Edge(Point p1, Point p2, Edge e0) {
@@ -52,7 +51,7 @@ public class Edge extends LineCommon {
     }
 
     double getCrossDenWithEdge(Edge e) {
-        return crossDen(-B, A, -e.B, e.A);
+        return cross(-B, A, -e.B, e.A);
     }
 
 }

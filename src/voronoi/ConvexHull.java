@@ -28,7 +28,7 @@ class ConvexHull {
     }
 
     private static boolean cmpArea(double d, int half) {
-        return half == 0 ? cmpGE(d, 0) : cmpLE(d, 0);
+        return half == 0 ? cmpGZ(d) : cmpLZ(d);
     }
 
     private void putPointHalf(Point p, int[] m, int i) {
