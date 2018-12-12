@@ -1,25 +1,16 @@
 package voronoi;
 
 import geometry.Line2D;
-import geometry.Point;
 
-import static geometry.Utils.comparePointXY;
 import static geometry.Utils.doLinesIntersect;
 
 class CellIterator {
-    boolean clock;
-    DirectedEdge de;
+    private boolean clock;
+    private DirectedEdge de;
 
     CellIterator(DirectedEdge de, boolean clock) {
         this.clock = clock;
         this.de = de;
-    }
-
-    DirectedEdge getPosOpenedEdge() {
-        DirectedEdge tmp = de;
-        DirectedEdge res = trySearchPosInfEdge() ? de : tmp;
-        de = tmp;
-        return res;
     }
 
     DirectedEdge getAnyOpenedEdge() {
@@ -34,12 +25,11 @@ class CellIterator {
         DirectedEdge de0 = de;
         int c = 0;
         do {
-            if (c++ == 1000) throw new RuntimeException("PosInf edge search overflow");
+            if (c++ == 1000) throw new RuntimeException("AnyInf edge search overflow");
             de = clock ? de.next : de.pre;
         } while (de.inf == 0 && de != de0);
         return de.inf != 0;
     }
-
 
     private boolean trySearchPosInfEdge() {
         if (de.inf == 1) return true;
@@ -67,31 +57,24 @@ class CellIterator {
     DirectedEdge cropCell(Edge ray, DirectedEdge ins) {
         getNext();
         int c = 0;
-        Point pnt = ray.getIntersection(de.e);
-        while (pnt != null &&
-                notIntersect(ray,pnt) &&
-                removeAndGetNext()) {
-            if (c++ == 1000) throw new RuntimeException("Cell crop overflow");
-        }
+        if (ray.getIntersection(de) == null) insert(DirectedEdge.getNegInfinity());
+        else
+            while (notIntersect(ray) && removeAndGetNext())
+                if (c++ == 1000) throw new RuntimeException("Cell crop overflow");
         DirectedEdge res = de;
         insert(ins);
         return res;
     }
 
-    private Line2D getCurLine() {
+    private Line2D toLine() {
         return new Line2D(
-                de.e == null ? (de.pre.fwd ? de.pre.e.i[1] : de.pre.e.i[0]) : de.e.o1,
-                de.e == null ? (de.next.fwd ? de.next.e.i[0] : de.next.e.i[1]) : de.e.o2);
+                de.inf != 0 ? (de.pre.fwd ? de.pre.e.i[1] : de.pre.e.i[0]) : de.e.o1,
+                de.inf != 0 ? (de.next.fwd ? de.next.e.i[0] : de.next.e.i[1]) : de.e.o2);
     }
 
-    private boolean notIntersect(Edge ray, Point pnt) {
-        if (de.e == null && (de.pre.e == null || de.next.e == null)) return false;
-        Line2D e = getCurLine();
-        boolean b1 = comparePointXY(pnt, e.p1) == 0;
-        boolean b2 = comparePointXY(pnt, e.p2) == 0;
-        boolean b3 = comparePointXY(pnt, ray.o1) == 0;
-//        if (b1^b2) return false;
-        boolean tmp = doLinesIntersect(e.p1, e.p2, ray.i[0], ray.i[1]);
+    private boolean notIntersect(Edge ray) {
+        if (de.inf != 0 && (de.next.inf != 0 || de.pre.inf != 0)) return false;
+        Line2D e = toLine();
         return !doLinesIntersect(e.p1, e.p2, ray.i[0], ray.i[1]);
     }
 
@@ -101,7 +84,7 @@ class CellIterator {
     }
 
     private boolean removeAndGetNext() {
-        if (de.pre==de && de.next==de) return false;
+        if (de.pre == de && de.next == de) return false;
         DirectedEdge pre = de.pre;
         DirectedEdge next = de.next;
         if (clock) de = next;
@@ -147,10 +130,9 @@ class CellIterator {
         do {
             if (c++ == 1000) throw new RuntimeException("Cell to string overflow");
             if (n == de) s.append(clock ? ">>>" : "<<<");
-            if (n.inf !=0) s.append("\t").append(n.inf==1?"+inf":"-inf").append("\n");
-            else
-                if (n.fwd) s.append("\t").append(n.e.o1).append(" -> ").append(n.e.o2).append("\n");
-                else s.append("\t").append(n.e.o2).append(" -> ").append(n.e.o1).append("\n");
+            if (n.inf != 0) s.append("\t").append(n.inf == 1 ? "+inf" : "-inf").append("\n");
+            else if (n.fwd) s.append("\t").append(n.e.o1).append(" -> ").append(n.e.o2).append("\n");
+            else s.append("\t").append(n.e.o2).append(" -> ").append(n.e.o1).append("\n");
             n = n.next;
         } while (n != n0);
         return s.toString();

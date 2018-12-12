@@ -13,9 +13,9 @@ import static voronoi.ConvexHull.mergeHulls;
 
 class Diagram {
     private ConvexHull hull;
-    HashMap<Point, CellIterator> cell = new HashMap<>();
-    static public List<Line2D> tr = null;
-    static public boolean traceRay = false;
+    private HashMap<Point, CellIterator> cell = new HashMap<>();
+    private static List<Line2D> tr = null;
+    private static boolean traceRay = false;
 
     private Diagram(Diagram d1, Diagram d2) {
         this.hull = mergeHulls(d1.hull, d2.hull);
@@ -57,9 +57,7 @@ class Diagram {
         return mergeDiagrams(d1, d2);
     }
 
-    static boolean dbg = false;
-
-    static Diagram mergeDiagrams(Diagram d1, Diagram d2) {
+    static private Diagram mergeDiagrams(Diagram d1, Diagram d2) {
         boolean traceRay = Diagram.traceRay;
         Diagram.traceRay = false;
         if (traceRay) tr = new ArrayList<>();
@@ -67,27 +65,15 @@ class Diagram {
         Point pivot[] = new Point[]{d.hull.pivot[0].p1, d.hull.pivot[0].p2};
         CellIterator itr[] = new CellIterator[]{d1.cell.get(pivot[0]).init(true), d2.cell.get(pivot[1]).init(false)};
         Edge ray = null;
-        if (dbg) {
-            System.out.println("debug");
-        }
-
         for (int i = 0; i < 5000; i++) {
-            if (dbg) {
-                System.out.println(i + ": " + pivot[0] + "<<<>>>" + pivot[1]);
-                System.out.println(d);
-            }
             ray = new Edge(pivot[0], pivot[1], ray);
             DirectedEdge[] pair = DirectedEdge.getJoinedEdges(ray);
-            if (dbg && i == 1) {
-                System.out.println("123123");
-            }
-            DirectedEdge edges[] = new DirectedEdge[]{itr[0].cropCell(ray, pair[0]),
-                    itr[1].cropCell(ray, pair[1])};
+            DirectedEdge edges[] = new DirectedEdge[]{itr[0].cropCell(ray, pair[0]), itr[1].cropCell(ray, pair[1])};
             if (pivot[0] == d.hull.pivot[1].p1 && pivot[1] == d.hull.pivot[1].p2) {
                 if (traceRay) tr.add(new Line2D(ray.o1, ray.o2));
                 return d;
             }
-            Point[] intPoint = new Point[]{ray.getIntersection(edges[0].e), ray.getIntersection(edges[1].e)};
+            Point[] intPoint = new Point[]{ray.getIntersection(edges[0]), ray.getIntersection(edges[1])};
             if (intPoint[0] == null && intPoint[1] == null) throw new RuntimeException("No intersection");
             int l = ray.getDistToOrigin(intPoint[0]) < ray.getDistToOrigin(intPoint[1]) ? 0 : 1;
             ray.o2 = intPoint[l];
@@ -105,21 +91,26 @@ class Diagram {
         throw new RuntimeException("Merging overflow");
     }
 
-    void draw(Canvas pap, boolean drawTR) {
-        for (Map.Entry<Point, CellIterator> siteCell : cell.entrySet()) {
-            CellIterator itr = siteCell.getValue();
-            Point p0 = siteCell.getKey();
-            pap.addPoint(p0, Color.BLACK, 4);
-            DirectedEdge n0 = itr.de, n = n0;
-            int c = 0;
-            do {
-                if (c++ == 1000) throw new RuntimeException("Drawing overflow");
-                if (n.inf == 0) pap.addLine(n.e.toShiftedLine(p0, 0.8), n.fwd ? Color.BLUE : Color.RED, false);
-                n = n.next;
-            } while (n != n0);
+    void draw(Canvas pap, boolean drawTraceRay, boolean drawOpenedCells, String txt) {
+        synchronized (pap.figures) {
+            pap.clear();
+            for (Map.Entry<Point, CellIterator> siteCell : cell.entrySet()) {
+                CellIterator itr = siteCell.getValue();
+                DirectedEdge n0 = itr.getAnyOpenedEdge();
+                if (!drawOpenedCells && n0.inf != 0) continue;
+                Point p0 = siteCell.getKey();
+                pap.addPoint(p0, Color.BLACK, 4);
+                DirectedEdge n = n0;
+                int c = 0;
+                do {
+                    if (c++ == 1000) throw new RuntimeException("Drawing overflow");
+                    if (n.inf == 0) pap.addLine(n.e.toShiftedLine(p0, 0.8), n.fwd ? Color.BLUE : Color.RED, false);
+                    n = n.next;
+                } while (n != n0);
+            }
+            if (drawTraceRay && tr != null) for (Line2D l : tr) pap.addLine(l, Color.RED, true);
+            pap.addText(txt,5,15,Color.BLACK);
         }
-        if (drawTR && tr != null) for (Line2D l : tr)
-            pap.addLine(l, Color.RED, true);
         pap.repaint();
     }
 

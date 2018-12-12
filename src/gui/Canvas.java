@@ -13,14 +13,20 @@ import java.util.ArrayList;
 public class Canvas extends JComponent {
     final static BasicStroke stroke = new BasicStroke(0.7f);
     final static BasicStroke boldStroke = new BasicStroke(2.0f);
+    boolean antialiasing;
     public boolean closed = false;
-    private final ArrayList<Drawable> figures = new ArrayList<>();
-    double x0;
-    double y0;
-    public double z;
+    final public ArrayList<Drawable> figures = new ArrayList<>();
+    private double x0, y0, z;
 
+    public void setZ(double z) {
+        this.z = z;
+    }
 
-    public void addLine(Line2D l, Color c,boolean bold) {
+    public void addText(String s, int x, int y, Color color) {
+        figures.add(new DrawableText(s, x, y, color));
+    }
+
+    public void addLine(Line2D l, Color c, boolean bold) {
         if (l == null) return;
         figures.add(new DrawableLine(l.p1, l.p2, c, bold));
     }
@@ -37,19 +43,21 @@ public class Canvas extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (Drawable f : figures) f.Draw(g, this);
-
+        synchronized (figures) {
+            for (Drawable f : figures) f.Draw(g, this);
+        }
     }
 
-    public Canvas(int x, int y, double z) {
+    public Canvas(int x, int y, double z, boolean antialiasing) {
+        this.antialiasing = antialiasing;
         WindowAdapter windowAdapter = new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent windowEvent) {
                 closed = true;
             }
         };
-        this.x0 = x / 2;
-        this.y0 = y / 2;
+        this.x0 = x / 2.0;
+        this.y0 = y / 2.0;
         this.z = z;
         JFrame testFrame = new JFrame();
         testFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -67,6 +75,5 @@ public class Canvas extends JComponent {
     int transformY(double y) {
         return (int) (y0 - y * z);
     }
-
 
 }

@@ -6,7 +6,6 @@ import geometry.Point;
 
 import static geometry.Utils.*;
 
-
 public class Edge extends LineCommon {
     private Point p1, p2;
     Point o1, o2;
@@ -43,15 +42,11 @@ public class Edge extends LineCommon {
     }
 
     Line2D toShiftedLine(Point p0, double k) {
-        return new Line2D(shiftPointToPoint(o1, p0, k), shiftPointToPoint(o2, p0, k));
+        return new Line2D(transformPointToPoint(o1, p0, k), transformPointToPoint(o2, p0, k));
     }
 
-    Point getIntersection(Edge edge) {
-        return edge == null ? (o2) : getLinesIntersectionPoint(this, edge);
-    }
-
-    double getCrossDenWithEdge(Edge e) {
-        return cross(-B, A, -e.B, e.A);
+    Point getIntersection(DirectedEdge de) {
+        return de.inf != 0 ? (o2) : getLinesIntersectionPoint(this, de.e);
     }
 
 }

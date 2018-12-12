@@ -18,3 +18,15 @@ Java Implementation by Alex Shavlovsky, 2018
 <p align="center">
   <img src="Screenshots/3.png?raw=true"/>
 </p>
+<p align="center">
+  <img src="Screenshots/4.png?raw=true"/>
+</p>
+<p align="center">
+  <img src="Screenshots/5.png?raw=true"/>
+</p>
+<p align="center">
+  <img src="Screenshots/6.png?raw=true"/>
+</p>
+<p align="center">
+  <img src="Screenshots/7.png?raw=true"/>
+</p>

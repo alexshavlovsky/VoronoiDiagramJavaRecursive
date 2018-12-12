@@ -6,6 +6,7 @@ class DirectedEdge {
     int inf = 0;
     DirectedEdge opposite, pre, next;
 
+    // directed edge constructor
     private DirectedEdge(Edge e, boolean fwd) {
         this.e = e;
         this.fwd = fwd;
@@ -17,15 +18,17 @@ class DirectedEdge {
     }
 
     // empty cell constructor
-    // an empty cell includes positive and negative infinities linked together
+    // an empty is a self-linked positive infinity
     static DirectedEdge getEmptyCell() {
         DirectedEdge posInf = new DirectedEdge(1);
-        DirectedEdge negInf = new DirectedEdge(-1);
-        posInf.pre = negInf;
-        posInf.next = negInf;
-        negInf.pre = posInf;
-        negInf.next = posInf;
+        posInf.next=posInf;
+        posInf.pre=posInf;
         return posInf;
+    }
+
+    // negative infinity constructor
+    static DirectedEdge getNegInfinity() {
+        return new DirectedEdge(-1);
     }
 
     // joined edges constructor
