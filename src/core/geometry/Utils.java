@@ -1,6 +1,6 @@
-package geometry;
+package core.geometry;
 
-import voronoi.Edge;
+import core.voronoi.Edge;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,6 +96,10 @@ public class Utils {
 
     static public List<Point> rotatePoints(List<Point> list, Point p0, double a) {
         return list.stream().map(p -> rotatePoint(p, p0, a)).collect(Collectors.toList());
+    }
+
+    static public List<Point> zoomPoints(List<Point> list, double z) {
+        return list.stream().map(p -> new Point(p.x * z, p.y * z)).collect(Collectors.toList());
     }
 
 }

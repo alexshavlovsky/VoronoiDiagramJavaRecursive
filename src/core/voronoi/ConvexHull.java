@@ -1,12 +1,12 @@
-package voronoi;
+package core.voronoi;
 
-import geometry.Line2D;
-import geometry.Point;
+import core.geometry.Line2D;
+import core.geometry.Point;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static geometry.Utils.*;
+import static core.geometry.Utils.*;
 
 class ConvexHull {
     private ArrayList<Point>[] halves;

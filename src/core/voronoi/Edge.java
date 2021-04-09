@@ -1,10 +1,10 @@
-package voronoi;
+package core.voronoi;
 
-import geometry.Line2D;
-import geometry.LineCommon;
-import geometry.Point;
+import core.geometry.Line2D;
+import core.geometry.LineCommon;
+import core.geometry.Point;
 
-import static geometry.Utils.*;
+import static core.geometry.Utils.*;
 
 public class Edge extends LineCommon {
     private Point p1, p2;

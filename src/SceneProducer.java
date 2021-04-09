@@ -1,6 +1,4 @@
-package voronoi;
-
-import geometry.Point;
+import core.geometry.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +56,25 @@ public class SceneProducer {
             }
 
             //random points
-            default: {
+            case 5: {
                 int n = 500;
                 for (int i = 0; i < n; i++) pts.add(new Point(-2 + r.nextFloat() * 4, -2 + r.nextFloat() * 4));
+                break;
+            }
+
+            default: {
+                int n = 2;
+                double r0 = 0.24;
+                for (int z = 0; z < 10; z++) {
+                    r0 *= 1.2;
+                    double an = 0;
+                    for (int i = 0; i < n; i++) {
+                        an += Math.PI * 2 / n;
+                        if (z < 6 || (r.nextInt(100) > 60+(z-6)*10)) pts.add(new Point(r0 * Math.cos(an), r0 * Math.sin(an)));
+                    }
+                    n = n * 2;
+                }
+                pts.add(new Point(0, 0));
                 break;
             }
 

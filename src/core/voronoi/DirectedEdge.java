@@ -1,4 +1,4 @@
-package voronoi;
+package core.voronoi;
 
 class DirectedEdge {
     Edge e;

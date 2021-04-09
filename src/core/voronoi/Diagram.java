@@ -1,17 +1,20 @@
-package voronoi;
+package core.voronoi;
 
-import geometry.Line2D;
-import geometry.Point;
-import geometry.Utils;
-import gui.Canvas;
+import core.geometry.Line2D;
+import core.geometry.Point;
+import core.geometry.Utils;
+import gui.DCircle;
+import gui.DLine;
+import gui.Drawable;
 
 import java.awt.*;
-import java.util.*;
+import java.awt.geom.Point2D;
 import java.util.List;
+import java.util.*;
 
-import static voronoi.ConvexHull.mergeHulls;
+import static core.voronoi.ConvexHull.mergeHulls;
 
-class Diagram {
+public class Diagram {
     private ConvexHull hull;
     private HashMap<Point, CellIterator> cell = new HashMap<>();
     private static List<Line2D> tr = null;
@@ -40,7 +43,7 @@ class Diagram {
         cell.put(p2, itr2);
     }
 
-    Diagram(List<Point> s) {
+    public Diagram(List<Point> s) {
         s.sort(Utils::comparePointXY);
         Diagram d = Recursive(s, 0, s.size(), s.size());
         this.hull = d.hull;
@@ -91,27 +94,36 @@ class Diagram {
         throw new RuntimeException("Merging overflow");
     }
 
-    void draw(Canvas pap, boolean drawTraceRay, boolean drawOpenedCells, String txt) {
-        synchronized (pap.figures) {
-            pap.clear();
-            for (Map.Entry<Point, CellIterator> siteCell : cell.entrySet()) {
-                CellIterator itr = siteCell.getValue();
-                DirectedEdge n0 = itr.getAnyOpenedEdge();
-                if (!drawOpenedCells && n0.inf != 0) continue;
-                Point p0 = siteCell.getKey();
-                pap.addPoint(p0, Color.BLACK, 4);
-                DirectedEdge n = n0;
-                int c = 0;
-                do {
-                    if (c++ == 1000) throw new RuntimeException("Drawing overflow");
-                    if (n.inf == 0) pap.addLine(n.e.toShiftedLine(p0, 0.8), n.fwd ? Color.BLUE : Color.RED, false);
-                    n = n.next;
-                } while (n != n0);
-            }
-            if (drawTraceRay && tr != null) for (Line2D l : tr) pap.addLine(l, Color.RED, true);
-            pap.addText(txt,5,15,Color.BLACK);
+    private static BasicStroke defStroke = new BasicStroke(0.005f);
+    private static BasicStroke boldStroke = new BasicStroke(0.010f);
+    private static double siteSize = 0.03;
+
+    private static Point2D.Double toPoint2D(Point p){
+        return new Point2D.Double(p.x, p.y);
+    }
+
+    public List<Drawable> toDrawable(boolean drawTraceRay, boolean drawOpenedCells) {
+        List<Drawable> drawables = new ArrayList<>();
+        for (Map.Entry<Point, CellIterator> siteCell : cell.entrySet()) {
+            CellIterator itr = siteCell.getValue();
+            DirectedEdge n0 = itr.getAnyOpenedEdge();
+            if (!drawOpenedCells && n0.inf != 0) continue;
+            Point p0 = siteCell.getKey();
+            drawables.add(new DCircle(p0.x, p0.y, siteSize, Color.BLACK, defStroke));
+            DirectedEdge n = n0;
+            int c = 0;
+            do {
+                if (c++ == 1000) throw new RuntimeException("Drawing overflow");
+                if (n.inf == 0) {
+                    Line2D z = n.e.toShiftedLine(p0, 0.8);
+                    drawables.add(new DLine(toPoint2D(z.p1), toPoint2D(z.p2), n.fwd ? Color.BLUE : Color.RED, defStroke));
+                }
+                n = n.next;
+            } while (n != n0);
         }
-        pap.repaint();
+        if (drawTraceRay && tr != null) for (Line2D line : tr)
+            drawables.add(new DLine(toPoint2D(line.p1), toPoint2D(line.p2), Color.RED, boldStroke));
+        return drawables;
     }
 
     @Override

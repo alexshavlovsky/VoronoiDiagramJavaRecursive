@@ -1,8 +1,8 @@
-package voronoi;
+package core.voronoi;
 
-import geometry.Line2D;
+import core.geometry.Line2D;
 
-import static geometry.Utils.doLinesIntersect;
+import static core.geometry.Utils.doLinesIntersect;
 
 class CellIterator {
     private boolean clock;

@@ -1,7 +1,8 @@
 package gui;
 
+
 import java.awt.*;
 
 public interface Drawable {
-    void Draw(Graphics g, Canvas c);
+    void draw(Graphics2D g);
 }
